@@ -108,7 +108,7 @@ impl ElectionData {
         for nominator in &self.nominators {
             for target in &nominator.targets {
                 if !candidate_id_set.contains(target) {
-                    let available_candidates: Vec<&String> = self.candidates.iter().take(5).map(|c| &c.account_id).collect();
+                    let available_candidates: Vec<String> = self.candidates.iter().take(5).map(|c| c.account_id.clone()).collect();
                     let candidate_list = if self.candidates.len() > 5 {
                         format!("{} (and {} more)", available_candidates.join(", "), self.candidates.len() - 5)
                     } else {

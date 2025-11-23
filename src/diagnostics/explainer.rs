@@ -63,7 +63,7 @@ impl DiagnosticsGenerator {
             let explanation = if is_selected {
                 self.explain_selected_validator(
                     candidate,
-                    selected_validator_map.get(&candidate.account_id),
+                    selected_validator_map.get(&candidate.account_id).copied(),
                     &stake_by_validator,
                     &nominator_count_by_validator,
                     &result.selected_validators,
@@ -123,8 +123,8 @@ impl DiagnosticsGenerator {
         &self,
         candidate: &crate::models::validator::ValidatorCandidate,
         selected_info: Option<&crate::models::election_result::SelectedValidator>,
-        stake_by_validator: &HashMap<&String, u128>,
-        nominator_count_by_validator: &HashMap<&String, u32>,
+        _stake_by_validator: &HashMap<&String, u128>,
+        _nominator_count_by_validator: &HashMap<&String, u32>,
         all_selected: &[crate::models::election_result::SelectedValidator],
     ) -> ValidatorExplanation {
         let mut key_factors = Vec::new();
@@ -193,7 +193,7 @@ impl DiagnosticsGenerator {
     fn explain_unselected_validator(
         &self,
         candidate: &crate::models::validator::ValidatorCandidate,
-        selected_set: &HashSet<&String>,
+        _selected_set: &HashSet<&String>,
         stake_by_validator: &HashMap<&String, u128>,
         all_selected: &[crate::models::election_result::SelectedValidator],
     ) -> ValidatorExplanation {

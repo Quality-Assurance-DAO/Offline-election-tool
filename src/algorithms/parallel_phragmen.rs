@@ -128,6 +128,7 @@ impl ElectionAlgorithm for ParallelPhragmen {
                 execution_timestamp: Some(chrono::Utc::now().to_rfc3339()),
                 data_source: None,
             },
+            diagnostics: None,
         })
     }
 
