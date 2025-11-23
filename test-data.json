@@ -1,0 +1,72 @@
+{
+  "candidates": [
+    {
+      "account_id": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+      "stake": 1000000000000
+    },
+    {
+      "account_id": "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+      "stake": 2000000000000
+    },
+    {
+      "account_id": "5FLSigC9HGRKVhB9FiEo4Y3koPsNmBmLJbpXg2mp1hXcS59Y",
+      "stake": 1500000000000
+    },
+    {
+      "account_id": "5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3vXFyY",
+      "stake": 3000000000000
+    },
+    {
+      "account_id": "5HGjWAeFDfFCWHsjGQLg3nX36y1hp2d63TniDHLXot4jftRY",
+      "stake": 2500000000000
+    }
+  ],
+  "nominators": [
+    {
+      "account_id": "5DTestNominator1",
+      "stake": 500000000000,
+      "targets": [
+        "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+        "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty"
+      ]
+    },
+    {
+      "account_id": "5DTestNominator2",
+      "stake": 800000000000,
+      "targets": [
+        "5FLSigC9HGRKVhB9FiEo4Y3koPsNmBmLJbpXg2mp1hXcS59Y",
+        "5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3vXFyY"
+      ]
+    },
+    {
+      "account_id": "5DTestNominator3",
+      "stake": 1200000000000,
+      "targets": [
+        "5HGjWAeFDfFCWHsjGQLg3nX36y1hp2d63TniDHLXot4jftRY",
+        "5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3vXFyY",
+        "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty"
+      ]
+    },
+    {
+      "account_id": "5DTestNominator4",
+      "stake": 600000000000,
+      "targets": [
+        "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"
+      ]
+    },
+    {
+      "account_id": "5DTestNominator5",
+      "stake": 900000000000,
+      "targets": [
+        "5FLSigC9HGRKVhB9FiEo4Y3koPsNmBmLJbpXg2mp1hXcS59Y",
+        "5HGjWAeFDfFCWHsjGQLg3nX36y1hp2d63TniDHLXot4jftRY"
+      ]
+    }
+  ],
+  "metadata": {
+    "block_number": null,
+    "chain": "test-chain"
+  }
+}
+
+

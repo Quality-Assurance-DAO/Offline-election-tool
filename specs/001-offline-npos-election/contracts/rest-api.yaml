@@ -1,0 +1,496 @@
+openapi: 3.0.3
+info:
+  title: Offline NPoS Election Tool REST API
+  description: |
+    REST API for running offline NPoS (Nominated Proof of Stake) election simulations.
+    This API allows users to run elections with data from RPC, JSON files, or synthetic data,
+    and retrieve results and diagnostics.
+  version: 1.0.0
+  contact:
+    name: Offline Election Tool
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: https://api.example.com
+    description: Production server
+
+tags:
+  - name: Elections
+    description: Election execution and results
+  - name: Diagnostics
+    description: Election diagnostics and explanations
+
+paths:
+  /elections/run:
+    post:
+      summary: Run an election simulation
+      description: |
+        Execute an election simulation with the provided configuration and data.
+        Supports multiple data sources (RPC, JSON file, synthetic) and election algorithms.
+      tags:
+        - Elections
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ElectionRequest'
+            example:
+              algorithm: "sequential-phragmen"
+              active_set_size: 100
+              data_source:
+                type: "rpc"
+                url: "https://rpc.polkadot.io"
+                block_number: 12345678
+      responses:
+        '200':
+          description: Election completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ElectionResponse'
+        '400':
+          description: Invalid request (validation error, insufficient candidates, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error (algorithm failure, RPC error, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /elections/{election_id}/results:
+    get:
+      summary: Get election results
+      description: Retrieve the results of a previously executed election.
+      tags:
+        - Elections
+      parameters:
+        - name: election_id
+          in: path
+          required: true
+          description: Unique identifier for the election
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Election results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ElectionResult'
+        '404':
+          description: Election not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /elections/{election_id}/diagnostics:
+    get:
+      summary: Get election diagnostics
+      description: |
+        Retrieve detailed diagnostics explaining why each validator was selected or not selected,
+        stake distribution analysis, and algorithm-specific insights.
+      tags:
+        - Diagnostics
+      parameters:
+        - name: election_id
+          in: path
+          required: true
+          description: Unique identifier for the election
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Diagnostics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticsResponse'
+        '404':
+          description: Election not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ElectionRequest:
+      type: object
+      required:
+        - algorithm
+        - active_set_size
+        - data_source
+      properties:
+        algorithm:
+          type: string
+          enum:
+            - sequential-phragmen
+            - parallel-phragmen
+            - multi-phase
+          description: Election algorithm to use
+        active_set_size:
+          type: integer
+          minimum: 1
+          description: Number of validators to select
+        data_source:
+          oneOf:
+            - $ref: '#/components/schemas/RpcDataSource'
+            - $ref: '#/components/schemas/JsonFileDataSource'
+            - $ref: '#/components/schemas/SyntheticDataSource'
+        overrides:
+          $ref: '#/components/schemas/ElectionOverrides'
+        block_number:
+          type: integer
+          minimum: 0
+          description: Block number for RPC snapshot (optional, only for RPC data source)
+
+    RpcDataSource:
+      type: object
+      required:
+        - type
+        - url
+      properties:
+        type:
+          type: string
+          enum:
+            - rpc
+          example: "rpc"
+        url:
+          type: string
+          format: uri
+          description: Substrate RPC endpoint URL
+          example: "https://rpc.polkadot.io"
+        block_number:
+          type: integer
+          minimum: 0
+          description: Block number to snapshot state (optional)
+
+    JsonFileDataSource:
+      type: object
+      required:
+        - type
+        - data
+      properties:
+        type:
+          type: string
+          enum:
+            - json
+          example: "json"
+        data:
+          $ref: '#/components/schemas/ElectionData'
+          description: Election data as JSON object
+
+    SyntheticDataSource:
+      type: object
+      required:
+        - type
+        - candidates
+        - nominators
+      properties:
+        type:
+          type: string
+          enum:
+            - synthetic
+          example: "synthetic"
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidatorCandidate'
+        nominators:
+          type: array
+          items:
+            $ref: '#/components/schemas/Nominator'
+
+    ElectionData:
+      type: object
+      required:
+        - candidates
+        - nominators
+      properties:
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidatorCandidate'
+        nominators:
+          type: array
+          items:
+            $ref: '#/components/schemas/Nominator'
+        metadata:
+          $ref: '#/components/schemas/ElectionMetadata'
+
+    ValidatorCandidate:
+      type: object
+      required:
+        - account_id
+        - stake
+      properties:
+        account_id:
+          type: string
+          description: SS58-encoded account identifier
+          example: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"
+        stake:
+          type: string
+          description: Stake amount as string to handle large numbers
+          example: "1000000000000"
+        metadata:
+          type: object
+          description: Optional metadata
+
+    Nominator:
+      type: object
+      required:
+        - account_id
+        - stake
+        - targets
+      properties:
+        account_id:
+          type: string
+          description: SS58-encoded account identifier
+          example: "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty"
+        stake:
+          type: string
+          description: Stake amount as string to handle large numbers
+          example: "500000000000"
+        targets:
+          type: array
+          items:
+            type: string
+          description: List of candidate account IDs this nominator votes for
+          example: ["5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"]
+        metadata:
+          type: object
+          description: Optional metadata
+
+    ElectionMetadata:
+      type: object
+      properties:
+        block_number:
+          type: integer
+        chain:
+          type: string
+          example: "polkadot"
+
+    ElectionOverrides:
+      type: object
+      properties:
+        candidate_stakes:
+          type: object
+          additionalProperties:
+            type: string
+          description: Override stake for specific candidates (account_id -> stake)
+        nominator_stakes:
+          type: object
+          additionalProperties:
+            type: string
+          description: Override stake for specific nominators (account_id -> stake)
+        voting_edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdgeModification'
+        active_set_size:
+          type: integer
+          minimum: 1
+
+    EdgeModification:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          enum:
+            - add
+            - remove
+            - modify
+        nominator_id:
+          type: string
+        candidate_id:
+          type: string
+        weight:
+          type: string
+          description: Optional weight for the edge
+
+    ElectionResponse:
+      type: object
+      required:
+        - election_id
+        - result
+      properties:
+        election_id:
+          type: string
+          format: uuid
+          description: Unique identifier for this election
+        result:
+          $ref: '#/components/schemas/ElectionResult'
+        execution_time_ms:
+          type: integer
+          description: Execution time in milliseconds
+
+    ElectionResult:
+      type: object
+      required:
+        - selected_validators
+        - stake_distribution
+        - total_stake
+        - algorithm_used
+      properties:
+        selected_validators:
+          type: array
+          items:
+            $ref: '#/components/schemas/SelectedValidator'
+        stake_distribution:
+          type: array
+          items:
+            $ref: '#/components/schemas/StakeAllocation'
+        total_stake:
+          type: string
+          description: Total stake participating in election
+        algorithm_used:
+          type: string
+          enum:
+            - sequential-phragmen
+            - parallel-phragmen
+            - multi-phase
+        execution_metadata:
+          $ref: '#/components/schemas/ExecutionMetadata'
+
+    SelectedValidator:
+      type: object
+      required:
+        - account_id
+        - total_backing_stake
+        - nominator_count
+      properties:
+        account_id:
+          type: string
+        total_backing_stake:
+          type: string
+        nominator_count:
+          type: integer
+        rank:
+          type: integer
+          description: Optional rank/position in active set
+
+    StakeAllocation:
+      type: object
+      required:
+        - nominator_id
+        - validator_id
+        - amount
+        - proportion
+      properties:
+        nominator_id:
+          type: string
+        validator_id:
+          type: string
+        amount:
+          type: string
+        proportion:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+
+    ExecutionMetadata:
+      type: object
+      properties:
+        block_number:
+          type: integer
+        execution_timestamp:
+          type: string
+          format: date-time
+        data_source:
+          type: string
+
+    DiagnosticsResponse:
+      type: object
+      required:
+        - election_id
+        - diagnostics
+      properties:
+        election_id:
+          type: string
+          format: uuid
+        diagnostics:
+          $ref: '#/components/schemas/Diagnostics'
+
+    Diagnostics:
+      type: object
+      required:
+        - validator_explanations
+        - stake_analysis
+      properties:
+        validator_explanations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidatorExplanation'
+        stake_analysis:
+          $ref: '#/components/schemas/StakeAnalysis'
+        algorithm_insights:
+          type: object
+          description: Algorithm-specific diagnostic information
+        warnings:
+          type: array
+          items:
+            type: string
+
+    ValidatorExplanation:
+      type: object
+      required:
+        - account_id
+        - selected
+        - reason
+      properties:
+        account_id:
+          type: string
+        selected:
+          type: boolean
+        reason:
+          type: string
+        key_factors:
+          type: array
+          items:
+            type: string
+        stake_details:
+          type: object
+
+    StakeAnalysis:
+      type: object
+      properties:
+        total_stake:
+          type: string
+        average_stake_per_validator:
+          type: string
+        stake_distribution_stats:
+          type: object
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error type/code
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error details
+        field:
+          type: string
+          description: Field name if validation error
+
+
