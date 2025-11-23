@@ -1,6 +1,50 @@
-# RPC Snapshots and Historical/Archive Node Support
+# RPC Usage Guide
 
-This document explains how the tool handles historical block queries, what archive nodes are, which RPC endpoints support historical queries, and how to troubleshoot issues with past-era simulations.
+This guide explains how to use RPC endpoints with the offline election tool, including archive nodes, historical block queries, and troubleshooting.
+
+## Quick Start
+
+### Test Connection to Polkadot
+
+```bash
+# Test with latest block
+cargo run -- run \
+  --algorithm sequential-phragmen \
+  --active-set-size 3 \
+  --rpc-url https://rpc.polkadot.io
+
+# Test with specific block number
+cargo run -- run \
+  --algorithm sequential-phragmen \
+  --active-set-size 3 \
+  --rpc-url https://rpc.polkadot.io \
+  --block-number 20000000
+```
+
+### Test Connection to Kusama
+
+```bash
+cargo run -- run \
+  --algorithm sequential-phragmen \
+  --active-set-size 3 \
+  --rpc-url https://kusama-rpc.polkadot.io
+```
+
+### Test Connection to Local Node
+
+```bash
+cargo run -- run \
+  --algorithm sequential-phragmen \
+  --active-set-size 3 \
+  --rpc-url http://localhost:9933
+```
+
+### Verification
+
+To verify the connection is working, check that:
+1. The tool connects without network errors
+2. A block hash is retrieved (shown in error message)
+3. The block number is correct (if specified)
 
 ## Overview
 
@@ -42,7 +86,14 @@ If the RPC endpoint doesn't have historical state, these queries will fail or re
 
 ## Supported RPC Endpoints
 
-### Known Archive Node Providers
+### Regular RPC Endpoints (Latest Blocks Only)
+
+- **Polkadot**: `https://rpc.polkadot.io`
+- **Kusama**: `https://kusama-rpc.polkadot.io`
+- **Westend**: `https://westend-rpc.polkadot.io`
+- **Rococo**: `https://rococo-rpc.polkadot.io`
+
+### Archive Node Endpoints (Historical Blocks)
 
 The following RPC endpoints are known to support historical queries (archive mode):
 
@@ -60,6 +111,8 @@ The following RPC endpoints are known to support historical queries (archive mod
 #### Westend
 - ✅ **OnFinality Archive**: `https://westend.api.onfinality.io/public` (archive mode)
 - ⚠️ **Public RPC**: `https://westend-rpc.polkadot.io` (limited historical support)
+
+**Important**: Regular RPC endpoints typically only maintain recent state (~256 blocks). For historical queries, you must use archive node endpoints.
 
 ### How to Verify Archive Node Support
 
@@ -105,11 +158,67 @@ The tool uses the following Substrate RPC methods for historical queries:
    - Used to enumerate all nominators and ledger entries
    - Requires archive node for historical blocks
 
-### Error Handling
+### Current Status
+
+✅ **Working:**
+- RPC endpoint connection
+- Block hash retrieval
+- Latest block number detection
+- Async runtime support
+
+⚠️ **In Progress:**
+- Storage key encoding (needs proper TwoX128 hashing)
+- SCALE codec decoding for validators and nominators
+- Storage queries for Staking::Validators, Staking::Nominators, Staking::Ledger
+
+### What Happens When You Run
+
+1. **Connection**: The tool successfully connects to the RPC endpoint
+2. **Block Hash**: Retrieves the block hash for the specified (or latest) block
+3. **Storage Query**: Attempts to query storage for validators and nominators
+4. **Current Limitation**: Storage decoding may not be fully implemented for all chains
+
+### Expected Output
+
+When you run the command, you may see:
+
+```
+Error: RPC error: Could not fetch validators. This may require chain-specific storage key encoding.
+Try using --input-file with JSON data instead, or check if the RPC endpoint supports state_queryStorageAt for Staking::Validators storage key.
+Block hash: 0x... (URL: https://rpc.polkadot.io)
+```
+
+This confirms:
+- ✅ RPC endpoint is reachable
+- ✅ Connection is successful
+- ✅ Block hash was retrieved
+- ⚠️ Storage decoding may need implementation
+
+### Next Steps for Full RPC Support
+
+To complete RPC support, the following needs to be implemented:
+
+1. **Storage Key Encoding**
+   - Use `sp_core::twox_128` to hash pallet and storage item names
+   - Encode: `twox128("Staking") + twox128("Validators")`
+   - Similar for Nominators and Ledger
+
+2. **SCALE Decoding**
+   - Decode `Vec<AccountId>` for validators
+   - Decode `BoundedVec<AccountId>` for nominator targets
+   - Decode `StakingLedger` for nominator stakes
+
+3. **Storage Queries**
+   - Query `Staking::Validators()` for validator list
+   - Query `Staking::Nominators()` for nominator targets
+   - Query `Staking::Ledger()` for nominator stakes
+   - Handle pagination for large datasets
+
+## Error Handling
 
 The tool includes comprehensive error handling for historical queries:
 
-#### Block Hash Retrieval Failures
+### Block Hash Retrieval Failures
 
 If `chain_getBlockHash` fails or times out:
 
@@ -129,7 +238,7 @@ Please try:
 - Use a more recent block number
 - Use `--input-file` with pre-fetched JSON data
 
-#### Storage Query Failures
+### Storage Query Failures
 
 If `state_getStorage` returns null or fails:
 
@@ -151,7 +260,7 @@ Try using --input-file with JSON data instead.
 - Verify the block number is valid for that chain
 - Use `--input-file` with pre-fetched JSON data
 
-#### Timeout Errors
+### Timeout Errors
 
 Historical queries can be slow. The tool uses timeouts:
 - 30 seconds for block hash retrieval
@@ -355,6 +464,14 @@ offline-election run \
   --input-file historical_snapshot.json \
   --diagnostics
 ```
+
+## Alternative: Use JSON Input
+
+Until storage decoding is fully implemented, you can:
+
+1. Fetch data manually from RPC using tools like `substrate-api-client`
+2. Convert to the JSON format expected by the tool
+3. Use `--input-file` to run elections
 
 ## Summary
 

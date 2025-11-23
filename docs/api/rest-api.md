@@ -1,4 +1,4 @@
-# API Server and Algorithm Usage Guide
+# REST API Documentation
 
 This guide provides comprehensive documentation for the REST API server, including:
 - Starting the API server
@@ -9,6 +9,8 @@ This guide provides comprehensive documentation for the REST API server, includi
 
 **Last Updated**: 2025-01-27  
 **Status**: Complete and up-to-date
+
+For programmatic library usage in Rust, see [Programmatic API Documentation](programmatic-api.md).
 
 ## Starting the API Server
 
@@ -879,7 +881,7 @@ Protect against memory exhaustion:
 # - Request size limits
 ```
 
-See the [Security and Robustness](../README.md#security-and-robustness) section in the main README for detailed recommendations.
+See the [Security and Robustness](../../README.md#security-and-robustness) section in the main README for detailed recommendations.
 
 ---
 

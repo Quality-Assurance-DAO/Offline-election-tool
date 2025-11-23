@@ -156,7 +156,7 @@ offline-election run \
   --block-number 12345678
 ```
 
-**Note**: For historical blocks (`--block-number`), use archive node endpoints. See [RPC_ARCHIVE_NODES.md](RPC_ARCHIVE_NODES.md) for details.
+**Note**: For historical blocks (`--block-number`), use archive node endpoints. See [RPC Usage Guide](docs/guides/rpc-usage.md) for details.
 
 ### Run Election from JSON File
 
@@ -212,7 +212,7 @@ curl -X POST http://localhost:3000/elections/run \
   -d '{"algorithm": "sequential-phragmen", "active_set_size": 100, "data_source": {"type": "rpc", "url": "https://rpc.polkadot.io"}}'
 ```
 
-See [API_USAGE.md](API_USAGE.md) for detailed API documentation and examples.
+See [REST API Documentation](docs/api/rest-api.md) and [Programmatic API Documentation](docs/api/programmatic-api.md) for detailed API documentation and examples.
 
 ## Usage
 
@@ -230,7 +230,7 @@ offline-election run [OPTIONS]
 - `--algorithm <ALGORITHM>` - Election algorithm: `sequential-phragmen`, `parallel-phragmen`, or `multi-phase` (required)
 - `--active-set-size <SIZE>` - Number of validators to select (required)
 - `--rpc-url <URL>` - RPC endpoint URL (conflicts with `--input-file` and `--synthetic`)
-- `--block-number <NUMBER>` - Block number for RPC snapshot (requires `--rpc-url`). **Note**: Historical blocks require archive node endpoints. See [RPC_ARCHIVE_NODES.md](RPC_ARCHIVE_NODES.md) for details.
+- `--block-number <NUMBER>` - Block number for RPC snapshot (requires `--rpc-url`). **Note**: Historical blocks require archive node endpoints. See [RPC Usage Guide](docs/guides/rpc-usage.md) for details.
 - `--input-file <PATH>` - Path to JSON file with election data (conflicts with `--rpc-url` and `--synthetic`)
 - `--synthetic` - Use synthetic data (conflicts with `--rpc-url` and `--input-file`)
 - `--override-candidate-stake <ACCOUNT_ID=STAKE>` - Override candidate stake (can be repeated)
@@ -334,7 +334,7 @@ The REST API provides HTTP endpoints for election operations:
 - `GET /elections/:id/diagnostics` - Get detailed diagnostics for an election
 - `GET /health` - Health check endpoint
 
-See [API_USAGE.md](API_USAGE.md) for comprehensive API documentation including:
+See [REST API Documentation](docs/api/rest-api.md) for comprehensive API documentation including:
 - Complete API usage examples for all three algorithms
 - **Synthetic data construction guide** with edge case examples
 - Validation rules and error handling
@@ -492,7 +492,7 @@ let app = Router::new()
 - Check network connectivity
 - Try alternative RPC endpoints (the tool suggests alternatives automatically)
 - Some RPC endpoints may have rate limits - wait and retry
-- **For historical blocks (`--block-number`)**: Use archive node endpoints (see [RPC_ARCHIVE_NODES.md](RPC_ARCHIVE_NODES.md))
+- **For historical blocks (`--block-number`)**: Use archive node endpoints (see [RPC Usage Guide](docs/guides/rpc-usage.md))
 
 **Validation Errors:**
 - Ensure all candidate account IDs are unique
@@ -514,10 +514,10 @@ let app = Router::new()
 
 - Check the [Quickstart Guide](specs/001-offline-npos-election/quickstart.md) for detailed examples
 - Review the [Feature Specification](specs/001-offline-npos-election/spec.md) for requirements
-- See [API_USAGE.md](API_USAGE.md) for API documentation
-- Check [TESTING.md](TESTING.md) for testing examples
-- **For historical block queries**: See [RPC_ARCHIVE_NODES.md](RPC_ARCHIVE_NODES.md) for archive node requirements and troubleshooting
-- **For performance benchmarks**: See [PERFORMANCE_BENCHMARKS.md](PERFORMANCE_BENCHMARKS.md) for performance testing and large-scale benchmarks
+- See [REST API Documentation](docs/api/rest-api.md) and [Programmatic API Documentation](docs/api/programmatic-api.md) for API documentation
+- Check [Testing Overview](docs/testing/overview.md) for testing examples
+- **For historical block queries**: See [RPC Usage Guide](docs/guides/rpc-usage.md) for archive node requirements and troubleshooting
+- **For performance benchmarks**: See [Performance Guide](docs/guides/performance.md) for performance testing and large-scale benchmarks
 
 ## Examples
 
@@ -691,7 +691,7 @@ Substrate chains can implement custom election providers via the `ElectionProvid
 - Providing an extensible architecture for custom algorithms
 - Using Substrate's native crates for accuracy
 
-See [ALGORITHM_EXTENSIBILITY.md](ALGORITHM_EXTENSIBILITY.md) for detailed documentation on adding new algorithms.
+See [Algorithm Guide](docs/guides/algorithms.md) for detailed documentation on adding new algorithms.
 
 ## Navigation
 

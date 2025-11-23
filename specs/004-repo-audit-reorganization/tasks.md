@@ -80,16 +80,16 @@ description: "Task list for Repository Audit and Reorganization feature implemen
 
 ### Implementation for User Story 2
 
-- [ ] T018 [US2] Consolidate TESTING.md and TEST_RUNNING_INSTRUCTIONS.md into docs/testing/overview.md, preserving all unique content and examples
-- [ ] T019 [US2] Consolidate RPC_ARCHIVE_NODES.md and RPC_TESTING.md into docs/guides/rpc-usage.md, preserving all unique content
-- [ ] T020 [US2] Split API_USAGE.md into docs/api/rest-api.md (REST API server documentation) and docs/api/programmatic-api.md (programmatic library API)
-- [ ] T021 [US2] Move ALGORITHM_EXTENSIBILITY.md to docs/guides/algorithms.md
-- [ ] T022 [US2] Move PERFORMANCE_BENCHMARKS.md to docs/guides/performance.md
-- [ ] T023 [US2] Move RFP_COMPLIANCE_ASSESSMENT.md to docs/reference/rfp-compliance.md
-- [ ] T024 [US2] Update README.md navigation links to point to new docs/ structure (api/, guides/, testing/, reference/)
-- [ ] T025 [US2] Add project structure section to README.md explaining major components and where to find documentation
-- [ ] T026 [US2] Update tests/README.md with links to docs/testing/overview.md
-- [ ] T027 [US2] Remove duplicate and redundant files after consolidation: ALGORITHM_EXTENSIBILITY.md, API_USAGE.md, PERFORMANCE_BENCHMARKS.md, RPC_ARCHIVE_NODES.md, RPC_TESTING.md, TESTING.md, TEST_RUNNING_INSTRUCTIONS.md, RFP_COMPLIANCE_ASSESSMENT.md
+- [X] T018 [US2] Consolidate TESTING.md and TEST_RUNNING_INSTRUCTIONS.md into docs/testing/overview.md, preserving all unique content and examples
+- [X] T019 [US2] Consolidate RPC_ARCHIVE_NODES.md and RPC_TESTING.md into docs/guides/rpc-usage.md, preserving all unique content
+- [X] T020 [US2] Split API_USAGE.md into docs/api/rest-api.md (REST API server documentation) and docs/api/programmatic-api.md (programmatic library API)
+- [X] T021 [US2] Move ALGORITHM_EXTENSIBILITY.md to docs/guides/algorithms.md
+- [X] T022 [US2] Move PERFORMANCE_BENCHMARKS.md to docs/guides/performance.md
+- [X] T023 [US2] Move RFP_COMPLIANCE_ASSESSMENT.md to docs/reference/rfp-compliance.md
+- [X] T024 [US2] Update README.md navigation links to point to new docs/ structure (api/, guides/, testing/, reference/)
+- [X] T025 [US2] Add project structure section to README.md explaining major components and where to find documentation
+- [X] T026 [US2] Update tests/README.md with links to docs/testing/overview.md
+- [X] T027 [US2] Remove duplicate and redundant files after consolidation: ALGORITHM_EXTENSIBILITY.md, API_USAGE.md, PERFORMANCE_BENCHMARKS.md, RPC_ARCHIVE_NODES.md, RPC_TESTING.md, TESTING.md, TEST_RUNNING_INSTRUCTIONS.md, RFP_COMPLIANCE_ASSESSMENT.md
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently - newcomers can understand the project and contributors can find all documentation easily
 

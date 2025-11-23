@@ -2,6 +2,8 @@
 
 This document provides comprehensive documentation for the test suite of the Offline Election Tool.
 
+For general testing information, including how to run elections and understand test results, see [Testing Overview](../docs/testing/overview.md).
+
 ## Overview
 
 The test suite is organized into several categories:
@@ -78,7 +80,7 @@ Large-scale performance tests validating execution times and memory usage:
 - `test_sparse_voting.rs` - Sparse voting patterns
 - `test_memory_leak.rs` - Memory leak detection (100 consecutive elections)
 
-**Note**: These tests use **synthetic data**. For real-world Polkadot mainnet performance benchmarks, see [PERFORMANCE_BENCHMARKS.md](../PERFORMANCE_BENCHMARKS.md).
+**Note**: These tests use **synthetic data**. For real-world Polkadot mainnet performance benchmarks, see [Performance Guide](../docs/guides/performance.md).
 
 **Usage**:
 ```bash
@@ -94,7 +96,7 @@ cargo test test_large_scale_1k -- --ignored
 cargo bench
 ```
 
-**Performance Documentation**: See [PERFORMANCE_BENCHMARKS.md](../PERFORMANCE_BENCHMARKS.md) for:
+**Performance Documentation**: See [Performance Guide](../docs/guides/performance.md) for:
 - Current benchmark status
 - How to benchmark with real Polkadot mainnet data
 - Performance characteristics and gaps
@@ -306,7 +308,7 @@ cargo test -- --skip slow
 
 ## Additional Resources
 
-- See `TEST_RUNNING_INSTRUCTIONS.md` for detailed test running instructions
+- See [Testing Overview](../docs/testing/overview.md) for detailed test running instructions
 - See `specs/002-comprehensive-testing/` for test design documents
 - See `specs/002-comprehensive-testing/contracts/` for fixture and benchmark contracts
 
