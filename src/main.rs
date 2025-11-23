@@ -18,12 +18,13 @@ enum Command {
     // Server command will be added in Phase 8
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let cli = Cli::parse();
     
     match cli.command {
         Command::Run(cmd) => {
-            if let Err(e) = cmd.execute() {
+            if let Err(e) = cmd.execute().await {
                 eprintln!("Error: {}", e);
                 std::process::exit(1);
             }

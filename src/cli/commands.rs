@@ -52,9 +52,9 @@ pub struct RunCommand {
 
 impl RunCommand {
     /// Execute the run command
-    pub fn execute(&self) -> Result<(), ElectionError> {
+    pub async fn execute(&self) -> Result<(), ElectionError> {
         // Load election data
-        let election_data = self.load_data()?;
+        let election_data = self.load_data().await?;
 
         // Parse algorithm type
         let algorithm = self.algorithm.parse::<AlgorithmType>()
@@ -85,14 +85,21 @@ impl RunCommand {
     }
 
     /// Load election data from the specified source
-    fn load_data(&self) -> Result<ElectionData, ElectionError> {
+    async fn load_data(&self) -> Result<ElectionData, ElectionError> {
         if let Some(ref rpc_url) = self.rpc_url {
-            // Load from RPC (async - would need tokio runtime)
-            // For now, return error indicating async support needed
-            return Err(ElectionError::RpcError {
-                message: "RPC loading requires async runtime - use async version or implement sync wrapper".to_string(),
-                url: rpc_url.clone(),
+            // Load from RPC
+            let loader = crate::input::rpc::RpcLoader::new(rpc_url)?;
+            let block_number = self.block_number.unwrap_or_else(|| {
+                // If no block number specified, use latest (None = latest)
+                0 // We'll handle this in the RPC loader
             });
+            
+            if block_number == 0 {
+                // Get latest block
+                loader.load_latest().await
+            } else {
+                loader.load_at_block(block_number).await
+            }
         } else if let Some(ref input_file) = self.input_file {
             // Load from JSON file
             let json_loader = crate::input::json::JsonLoader::new();
