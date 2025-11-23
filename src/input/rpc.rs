@@ -10,6 +10,11 @@ use serde_json::Value;
 use std::hash::Hasher;
 use twox_hash::XxHash64;
 
+/// Maximum number of retry attempts for transient errors
+const MAX_RETRIES: u32 = 5;
+/// Initial delay in seconds before first retry
+const INITIAL_RETRY_DELAY_SECS: u64 = 2;
+
 /// RPC loader for fetching election data from Substrate nodes
 pub struct RpcLoader {
     client: HttpClient,
@@ -36,21 +41,208 @@ impl RpcLoader {
         })
     }
 
+    /// Get suggested alternative RPC endpoints based on current URL
+    fn get_alternative_endpoints(&self) -> Vec<&str> {
+        let url_lower = self.url.to_lowercase();
+        if url_lower.contains("polkadot") {
+            vec![
+                "https://rpc.polkadot.io",
+                "https://polkadot.api.onfinality.io/public",
+                "https://polkadot-rpc.dwellir.com",
+                "https://polkadot.public.curie.com",
+                "https://polkadot-rpc.publicnode.com",
+                "https://1rpc.io/dot",
+            ]
+        } else if url_lower.contains("kusama") {
+            vec![
+                "https://kusama-rpc.polkadot.io",
+                "https://kusama.api.onfinality.io/public",
+                "https://kusama-rpc.dwellir.com",
+                "https://kusama-rpc.publicnode.com",
+                "https://1rpc.io/ksm",
+            ]
+        } else if url_lower.contains("westend") {
+            vec![
+                "https://westend-rpc.polkadot.io",
+                "https://westend.api.onfinality.io/public",
+            ]
+        } else {
+            // Generic/unknown chain - suggest Polkadot endpoints as default
+            vec![
+                "https://rpc.polkadot.io",
+                "https://polkadot.api.onfinality.io/public",
+                "https://polkadot-rpc.dwellir.com",
+                "https://polkadot.public.curie.com",
+            ]
+        }
+    }
+
+    /// Check if an error is retryable (transient error)
+    fn is_retryable_error(&self, error: &ElectionError) -> bool {
+        match error {
+            ElectionError::RpcError { message, .. } => {
+                let msg_lower = message.to_lowercase();
+                // Check for HTTP status codes in error message
+                msg_lower.contains("503") || // Service Unavailable
+                msg_lower.contains("502") || // Bad Gateway
+                msg_lower.contains("504") || // Gateway Timeout
+                msg_lower.contains("500") || // Internal Server Error
+                msg_lower.contains("timeout") ||
+                msg_lower.contains("network") ||
+                msg_lower.contains("connection") ||
+                msg_lower.contains("temporary") ||
+                msg_lower.contains("unavailable") ||
+                msg_lower.contains("server returned an error status code") ||
+                msg_lower.contains("networking or low-level protocol error")
+            }
+            _ => false,
+        }
+    }
+
+    /// Retry an RPC call with exponential backoff for transient errors
+    async fn retry_rpc_call<F, Fut, T>(&self, mut f: F) -> Result<T, ElectionError>
+    where
+        F: FnMut() -> Fut,
+        Fut: std::future::Future<Output = Result<T, ElectionError>>,
+    {
+        for attempt in 0..=MAX_RETRIES {
+            match f().await {
+                Ok(result) => return Ok(result),
+                Err(e) => {
+                    // Check if error is retryable
+                    if !self.is_retryable_error(&e) {
+                        // Not retryable, return immediately
+                        return Err(e);
+                    }
+                    
+                    // If this was the last attempt, return enhanced error with suggestions
+                    if attempt >= MAX_RETRIES {
+                        return Err(match &e {
+                            ElectionError::RpcError { message, url } => {
+                                let alternatives = self.get_alternative_endpoints();
+                                let alternatives_list = alternatives
+                                    .iter()
+                                    .map(|alt| format!("  - {}", alt))
+                                    .collect::<Vec<_>>()
+                                    .join("\n");
+                                
+                                ElectionError::RpcError {
+                                    message: format!(
+                                        "{}\n\n\
+                                        All {} retry attempts failed. The RPC endpoint appears to be unavailable.\n\n\
+                                        Suggested alternative endpoints:\n{}\n\n\
+                                        Other options:\n\
+                                        - Use --input-file with JSON data instead\n\
+                                        - Wait a few minutes and try again\n\
+                                        - Check the endpoint status page",
+                                        message,
+                                        MAX_RETRIES + 1,
+                                        alternatives_list
+                                    ),
+                                    url: url.clone(),
+                                }
+                            }
+                            _ => e,
+                        });
+                    }
+                    
+                    // Calculate exponential backoff delay with cap at 30 seconds
+                    let delay_secs = std::cmp::min(
+                        INITIAL_RETRY_DELAY_SECS * (1u64 << attempt),
+                        30
+                    );
+                    eprintln!("  ⚠ RPC error (attempt {}/{}), retrying in {} seconds...", 
+                             attempt + 1, MAX_RETRIES + 1, delay_secs);
+                    std::io::Write::flush(&mut std::io::stderr()).ok();
+                    
+                    // Wait before retrying
+                    tokio::time::sleep(std::time::Duration::from_secs(delay_secs)).await;
+                }
+            }
+        }
+        
+        // This should never be reached, but handle it just in case
+        Err(ElectionError::RpcError {
+            message: "Unknown error during retry".to_string(),
+            url: self.url.clone(),
+        })
+    }
+
     /// Load election data at a specific block number
     pub async fn load_at_block(&self, block_number: u64) -> Result<ElectionData, ElectionError> {
+        eprintln!("Fetching data from block {}...", block_number);
+        std::io::Write::flush(&mut std::io::stderr()).ok();
+        
         // Fetch block hash first
-        let block_hash = self.get_block_hash(block_number).await?;
+        eprintln!("  → Getting block hash (this may take up to 30 seconds)...");
+        std::io::Write::flush(&mut std::io::stderr()).ok();
+        
+        let block_hash = tokio::time::timeout(
+            std::time::Duration::from_secs(30),
+            self.get_block_hash(block_number)
+        ).await.map_err(|_| ElectionError::RpcError {
+            message: format!(
+                "Timeout after 30 seconds while getting block hash for block {}.\n\
+                The RPC endpoint may be slow or unresponsive.\n\
+                Please try:\n\
+                - Using a different RPC endpoint\n\
+                - Using --input-file with JSON data instead\n\
+                - Checking your network connection",
+                block_number
+            ),
+            url: self.url.clone(),
+        })??;
+        
+        eprintln!("  ✓ Block hash: {}", block_hash);
+        std::io::Write::flush(&mut std::io::stderr()).ok();
 
         // Fetch validator candidates
-        let candidates = self.fetch_validators(&block_hash).await?;
+        eprintln!("  → Fetching validators (this may take up to 30 seconds)...");
+        std::io::Write::flush(&mut std::io::stderr()).ok();
+        
+        let candidates = tokio::time::timeout(
+            std::time::Duration::from_secs(30),
+            self.fetch_validators(&block_hash)
+        ).await.map_err(|_| ElectionError::RpcError {
+            message: format!(
+                "Timeout after 30 seconds while fetching validators.\n\
+                Block hash: {}\n\
+                The RPC endpoint may be slow or unresponsive.",
+                block_hash
+            ),
+            url: self.url.clone(),
+        })??;
+        
+        eprintln!("  ✓ Found {} validators", candidates.len());
+        std::io::Write::flush(&mut std::io::stderr()).ok();
 
         // Fetch nominators and their votes
-        // If fetching fails, proceed with empty nominators (election can run with just validators)
-        let nominators = self.fetch_nominators(&block_hash).await.unwrap_or_else(|e| {
-            eprintln!("Warning: Could not fetch nominators from RPC: {}", e);
-            eprintln!("Proceeding with zero nominators - election will use only validator self-stakes.");
+        eprintln!("  → Fetching nominators (this may take a while, timeout: 60 seconds)...");
+        std::io::Write::flush(&mut std::io::stderr()).ok();
+        
+        let nominators = tokio::time::timeout(
+            std::time::Duration::from_secs(60),
+            self.fetch_nominators(&block_hash)
+        ).await.unwrap_or_else(|_| {
+            Err(ElectionError::RpcError {
+                message: format!(
+                    "Timeout after 60 seconds while fetching nominators.\n\
+                    Block hash: {}\n\
+                    This usually means the RPC endpoint doesn't support storage queries or is very slow.\n\
+                    Proceeding with zero nominators - election will use only validator self-stakes.",
+                    block_hash
+                ),
+                url: self.url.clone(),
+            })
+        }).unwrap_or_else(|e| {
+            eprintln!("  ⚠ Warning: Could not fetch nominators from RPC: {}", e);
+            eprintln!("  → Proceeding with zero nominators - election will use only validator self-stakes.");
+            std::io::Write::flush(&mut std::io::stderr()).ok();
             Vec::new()
         });
+        
+        eprintln!("  ✓ Found {} nominators", nominators.len());
+        std::io::Write::flush(&mut std::io::stderr()).ok();
 
         Ok(ElectionData {
             candidates,
@@ -65,25 +257,77 @@ impl RpcLoader {
     /// Load election data from the latest block
     pub async fn load_latest(&self) -> Result<ElectionData, ElectionError> {
         eprintln!("Fetching data from latest block...");
+        std::io::Write::flush(&mut std::io::stderr()).ok();
         
         // Get latest block hash (None = latest)
-        eprintln!("  → Getting latest block hash...");
-        let block_hash = self.get_block_hash(0).await?;
+        eprintln!("  → Getting latest block hash (this may take up to 30 seconds)...");
+        std::io::Write::flush(&mut std::io::stderr()).ok();
+        
+        let block_hash = tokio::time::timeout(
+            std::time::Duration::from_secs(30),
+            self.get_block_hash(0)
+        ).await.map_err(|_| ElectionError::RpcError {
+            message: format!(
+                "Timeout after 30 seconds while getting latest block hash.\n\
+                The RPC endpoint may be slow or unresponsive.\n\
+                Please try:\n\
+                - Using a different RPC endpoint\n\
+                - Using --input-file with JSON data instead\n\
+                - Checking your network connection"
+            ),
+            url: self.url.clone(),
+        })??;
+        
         eprintln!("  ✓ Block hash: {}", block_hash);
+        std::io::Write::flush(&mut std::io::stderr()).ok();
         
         // Fetch validator candidates
-        eprintln!("  → Fetching validators...");
-        let candidates = self.fetch_validators(&block_hash).await?;
+        eprintln!("  → Fetching validators (this may take up to 30 seconds)...");
+        std::io::Write::flush(&mut std::io::stderr()).ok();
+        
+        let candidates = tokio::time::timeout(
+            std::time::Duration::from_secs(30),
+            self.fetch_validators(&block_hash)
+        ).await.map_err(|_| ElectionError::RpcError {
+            message: format!(
+                "Timeout after 30 seconds while fetching validators.\n\
+                Block hash: {}\n\
+                The RPC endpoint may be slow or unresponsive.",
+                block_hash
+            ),
+            url: self.url.clone(),
+        })??;
+        
         eprintln!("  ✓ Found {} validators", candidates.len());
+        std::io::Write::flush(&mut std::io::stderr()).ok();
 
         // Fetch nominators and their votes
-        eprintln!("  → Fetching nominators (this may take a while)...");
-        let nominators = self.fetch_nominators(&block_hash).await.unwrap_or_else(|e| {
+        eprintln!("  → Fetching nominators (this may take a while, timeout: 60 seconds)...");
+        std::io::Write::flush(&mut std::io::stderr()).ok();
+        
+        let nominators = tokio::time::timeout(
+            std::time::Duration::from_secs(60),
+            self.fetch_nominators(&block_hash)
+        ).await.unwrap_or_else(|_| {
+            Err(ElectionError::RpcError {
+                message: format!(
+                    "Timeout after 60 seconds while fetching nominators.\n\
+                    Block hash: {}\n\
+                    This usually means the RPC endpoint doesn't support storage queries or is very slow.\n\
+                    Proceeding with zero nominators - election will use only validator self-stakes.",
+                    block_hash
+                ),
+                url: self.url.clone(),
+            })
+        }).unwrap_or_else(|e| {
             eprintln!("  ⚠ Warning: Could not fetch nominators from RPC: {}", e);
             eprintln!("  → Proceeding with zero nominators - election will use only validator self-stakes.");
+            std::io::Write::flush(&mut std::io::stderr()).ok();
             Vec::new()
         });
+        
         eprintln!("  ✓ Found {} nominators", nominators.len());
+        std::io::Write::flush(&mut std::io::stderr()).ok();
 
         // Get latest block number
         let latest_block = self.get_latest_block_number().await?;
@@ -100,51 +344,57 @@ impl RpcLoader {
 
     /// Get the latest block number
     async fn get_latest_block_number(&self) -> Result<u64, ElectionError> {
-        let response: Value = self
-            .client
-            .request("chain_getHeader", Vec::<String>::new())
-            .await
-            .map_err(|e| ElectionError::RpcError {
-                message: format!("Failed to get latest header: {}", e),
-                url: self.url.clone(),
-            })?;
+        self.retry_rpc_call(|| async {
+            let response: Value = self
+                .client
+                .request("chain_getHeader", Vec::<String>::new())
+                .await
+                .map_err(|e| ElectionError::RpcError {
+                    message: format!("Failed to get latest header: {}", e),
+                    url: self.url.clone(),
+                })?;
 
-        let number = response
-            .get("number")
-            .and_then(|n| n.as_str())
-            .ok_or_else(|| ElectionError::RpcError {
-                message: "Invalid header response".to_string(),
-                url: self.url.clone(),
-            })?;
+            let number = response
+                .get("number")
+                .and_then(|n| n.as_str())
+                .ok_or_else(|| ElectionError::RpcError {
+                    message: "Invalid header response".to_string(),
+                    url: self.url.clone(),
+                })?;
 
-        // Parse hex number
-        let number = number.trim_start_matches("0x");
-        u64::from_str_radix(number, 16).map_err(|e| ElectionError::RpcError {
-            message: format!("Failed to parse block number: {}", e),
-            url: self.url.clone(),
+            // Parse hex number
+            let number = number.trim_start_matches("0x");
+            u64::from_str_radix(number, 16).map_err(|e| ElectionError::RpcError {
+                message: format!("Failed to parse block number: {}", e),
+                url: self.url.clone(),
+            })
         })
+        .await
     }
 
     /// Get block hash for a given block number
     async fn get_block_hash(&self, block_number: u64) -> Result<String, ElectionError> {
-        let response: Value = self
-            .client
-            .request(
-                "chain_getBlockHash",
-                (format!("0x{:x}", block_number),),
-            )
-            .await
-            .map_err(|e| ElectionError::RpcError {
-                message: format!("Failed to get block hash: {}", e),
+        self.retry_rpc_call(|| async {
+            let response: Value = self
+                .client
+                .request(
+                    "chain_getBlockHash",
+                    (format!("0x{:x}", block_number),),
+                )
+                .await
+                .map_err(|e| ElectionError::RpcError {
+                    message: format!("Failed to get block hash: {}", e),
+                    url: self.url.clone(),
+                })?;
+
+            let hash = response.as_str().ok_or_else(|| ElectionError::RpcError {
+                message: "Invalid block hash response".to_string(),
                 url: self.url.clone(),
             })?;
 
-        let hash = response.as_str().ok_or_else(|| ElectionError::RpcError {
-            message: "Invalid block hash response".to_string(),
-            url: self.url.clone(),
-        })?;
-
-        Ok(hash.to_string())
+            Ok(hash.to_string())
+        })
+        .await
     }
 
     /// Fetch validator candidates from chain
