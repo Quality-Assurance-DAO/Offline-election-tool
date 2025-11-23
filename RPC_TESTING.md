@@ -119,3 +119,4 @@ To verify the connection is working, check that:
 
 The fact that you get a storage decoding error (not a connection error) confirms the RPC connection is successful!
 
+

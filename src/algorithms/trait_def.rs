@@ -18,3 +18,4 @@ pub trait ElectionAlgorithm {
     fn name(&self) -> &'static str;
 }
 
+

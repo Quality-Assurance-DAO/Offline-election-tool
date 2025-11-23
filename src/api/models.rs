@@ -15,3 +15,4 @@ pub struct ElectionResponse {
     // Implementation will be added in Phase 8 (T123-T125)
 }
 
+

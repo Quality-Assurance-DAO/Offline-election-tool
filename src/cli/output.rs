@@ -9,3 +9,4 @@ pub fn format_json(result: &ElectionResult) -> Result<String, crate::error::Elec
     result.to_json()
 }
 
+

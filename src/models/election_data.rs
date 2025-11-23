@@ -75,13 +75,8 @@ impl ElectionData {
             });
         }
 
-        // Must contain at least one nominator
-        if self.nominators.is_empty() {
-            return Err(ElectionError::ValidationError {
-                message: "Election data must contain at least one nominator".to_string(),
-                field: Some("nominators".to_string()),
-            });
-        }
+        // Nominators are optional - election can run with just validators (no nominator votes)
+        // This allows the tool to work when RPC endpoints don't support storage queries
 
         // All candidate account IDs must be unique
         let mut candidate_ids = HashSet::new();

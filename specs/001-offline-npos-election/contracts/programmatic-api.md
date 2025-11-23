@@ -407,3 +407,4 @@ match engine.execute(&config, &data) {
 - Results are computed lazily - diagnostics are only generated when requested
 - JSON serialization of results can be expensive for large elections - consider streaming for very large outputs
 
+

@@ -378,3 +378,4 @@ If an algorithm fails to converge:
 - Use `--diagnostics` flag to get detailed explanations
 - Review the feature specification in `spec.md` for requirements and constraints
 
+

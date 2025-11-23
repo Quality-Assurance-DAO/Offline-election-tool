@@ -424,3 +424,4 @@ All entities support JSON serialization via `serde`:
 - Parameter overrides allow modification of data without changing source files
 - Diagnostics provide detailed explanations for transparency and debugging
 
+
