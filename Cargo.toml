@@ -45,6 +45,11 @@ thiserror = "1.0"
 uuid = { version = "1.0", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 
+# Hashing for storage keys (TwoX128)
+twox-hash = "1.0"
+# Hex encoding/decoding
+hex = "0.4"
+
 [dev-dependencies]
 # Testing utilities as needed
 
