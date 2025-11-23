@@ -1,0 +1,34 @@
+{
+  "metadata": {
+    "test_name": "maximum_stakes",
+    "description": "Edge case: extremely large stake values (near u128::MAX)",
+    "created": "2025-01-27T10:00:00Z",
+    "algorithm": "sequential-phragmen",
+    "category": "edge_case",
+    "tags": ["large_stakes", "edge_case"]
+  },
+  "input": {
+    "candidates": [
+      {
+        "account_id": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+        "stake": 9007199254740991
+      },
+      {
+        "account_id": "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+        "stake": 4503599627370495
+      }
+    ],
+    "nominators": [
+      {
+        "account_id": "5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY",
+        "stake": 9007199254740991,
+        "targets": [
+          "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+          "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty"
+        ]
+      }
+    ]
+  },
+  "expected_result": null
+}
+

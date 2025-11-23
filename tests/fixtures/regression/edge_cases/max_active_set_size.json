@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "test_name": "max_active_set_size",
+    "description": "Edge case: active set size equals candidate count",
+    "created": "2025-01-27T10:00:00Z",
+    "algorithm": "sequential-phragmen",
+    "category": "edge_case",
+    "tags": ["max_size", "edge_case"]
+  },
+  "input": {
+    "candidates": [
+      {
+        "account_id": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+        "stake": 1000000000
+      },
+      {
+        "account_id": "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+        "stake": 2000000000
+      },
+      {
+        "account_id": "5FLSigC9HGRKVhB9F7BqHjXJxZJxZJxZJxZJxZJxZJxZJxZJxZ",
+        "stake": 3000000000
+      }
+    ],
+    "nominators": [
+      {
+        "account_id": "5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY",
+        "stake": 1000000000,
+        "targets": [
+          "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+          "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+          "5FLSigC9HGRKVhB9F7BqHjXJxZJxZJxZJxZJxZJxZJxZJxZJxZ"
+        ]
+      }
+    ]
+  },
+  "expected_result": null
+}
+

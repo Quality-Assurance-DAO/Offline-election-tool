@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "test_name": "single_candidate",
+    "description": "Edge case: election with exactly one candidate",
+    "created": "2025-01-27T10:00:00Z",
+    "algorithm": "sequential-phragmen",
+    "category": "edge_case",
+    "tags": ["single_candidate", "edge_case"]
+  },
+  "input": {
+    "candidates": [
+      {
+        "account_id": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+        "stake": 1000000000
+      }
+    ],
+    "nominators": [
+      {
+        "account_id": "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+        "stake": 500000000,
+        "targets": ["5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"]
+      }
+    ]
+  },
+  "expected_result": null
+}
+

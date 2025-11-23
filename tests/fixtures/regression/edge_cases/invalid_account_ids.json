@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "test_name": "invalid_account_ids",
+    "description": "Edge case: invalid SS58 account ID format",
+    "created": "2025-01-27T10:00:00Z",
+    "algorithm": "sequential-phragmen",
+    "category": "edge_case",
+    "tags": ["invalid_format", "error_case"]
+  },
+  "input": {
+    "candidates": [
+      {
+        "account_id": "invalid_account_id_not_ss58",
+        "stake": 1000000000
+      }
+    ],
+    "nominators": [
+      {
+        "account_id": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+        "stake": 1000000000,
+        "targets": ["invalid_account_id_not_ss58"]
+      }
+    ]
+  },
+  "expected_result": null
+}
+

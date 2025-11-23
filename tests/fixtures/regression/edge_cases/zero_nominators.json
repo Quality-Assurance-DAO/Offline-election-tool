@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "test_name": "zero_nominators",
+    "description": "Edge case: election with zero nominators",
+    "created": "2025-01-27T10:00:00Z",
+    "algorithm": "sequential-phragmen",
+    "category": "edge_case",
+    "tags": ["zero_nominators", "edge_case"]
+  },
+  "input": {
+    "candidates": [
+      {
+        "account_id": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+        "stake": 1000000000
+      }
+    ],
+    "nominators": []
+  },
+  "expected_result": null
+}
+

@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "test_name": "empty_voting_edges",
+    "description": "Edge case: nominators voting for zero candidates",
+    "created": "2025-01-27T10:00:00Z",
+    "algorithm": "sequential-phragmen",
+    "category": "edge_case",
+    "tags": ["empty_edges", "edge_case"]
+  },
+  "input": {
+    "candidates": [
+      {
+        "account_id": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+        "stake": 1000000000
+      },
+      {
+        "account_id": "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+        "stake": 2000000000
+      }
+    ],
+    "nominators": [
+      {
+        "account_id": "5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY",
+        "stake": 1000000000,
+        "targets": []
+      },
+      {
+        "account_id": "5DbKjhNLpqX3HYq2b3tS1J3Z6sF7X8Y9Z0A1B2C3D4E5F6G7H8",
+        "stake": 2000000000,
+        "targets": []
+      }
+    ]
+  },
+  "expected_result": null
+}
+
