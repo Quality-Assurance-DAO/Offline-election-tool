@@ -1,7 +1,7 @@
 //! CLI binary entry point for the Offline NPoS Election Tool
 
 use clap::Parser;
-use offline_election::cli::commands::RunCommand;
+use offline_election::cli::commands::{RunCommand, ServerCommand};
 
 #[derive(Parser)]
 #[command(name = "offline-election")]
@@ -15,7 +15,8 @@ struct Cli {
 enum Command {
     /// Run an election simulation
     Run(RunCommand),
-    // Server command will be added in Phase 8
+    /// Start the REST API server
+    Server(ServerCommand),
 }
 
 #[tokio::main]
@@ -24,6 +25,12 @@ async fn main() {
     
     match cli.command {
         Command::Run(cmd) => {
+            if let Err(e) = cmd.execute().await {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+        Command::Server(cmd) => {
             if let Err(e) = cmd.execute().await {
                 eprintln!("Error: {}", e);
                 std::process::exit(1);

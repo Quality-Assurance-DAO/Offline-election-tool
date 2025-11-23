@@ -3,7 +3,7 @@
 pub mod commands;
 pub mod output;
 
-pub use commands::RunCommand;
+pub use commands::{RunCommand, ServerCommand};
 pub use output::format_json;
 
 

@@ -105,10 +105,25 @@ impl RunCommand {
             let json_loader = crate::input::json::JsonLoader::new();
             json_loader.load_from_file(input_file.clone())
         } else if self.synthetic {
-            // Create synthetic data
-            Err(ElectionError::InvalidData {
-                message: "Synthetic data creation not yet implemented".to_string(),
-            })
+            // Create synthetic data using the builder
+            // For CLI, create a simple example with a few candidates and nominators
+            // Users can use the programmatic API for more complex synthetic data
+            let mut builder = crate::input::synthetic::SyntheticDataBuilder::new();
+            
+            // Add some example candidates (can be any account IDs, don't need to exist on-chain)
+            builder
+                .add_candidate("0x1111111111111111111111111111111111111111111111111111111111111111".to_string(), 1000000)?
+                .add_candidate("0x2222222222222222222222222222222222222222222222222222222222222222".to_string(), 2000000)?
+                .add_candidate("0x3333333333333333333333333333333333333333333333333333333333333333".to_string(), 1500000)?
+                .add_candidate("0x4444444444444444444444444444444444444444444444444444444444444444".to_string(), 0)?; // Zero stake candidate
+            
+            // Add some example nominators
+            builder
+                .add_nominator("0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".to_string(), 500000, vec!["0x1111111111111111111111111111111111111111111111111111111111111111".to_string(), "0x2222222222222222222222222222222222222222222222222222222222222222".to_string()])?
+                .add_nominator("0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb".to_string(), 300000, vec!["0x3333333333333333333333333333333333333333333333333333333333333333".to_string()])?
+                .add_nominator("0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc".to_string(), 0, vec![])?; // Zero stake nominator
+            
+            builder.build()
         } else {
             Err(ElectionError::ValidationError {
                 message: "Must specify one of: --rpc-url, --input-file, or --synthetic".to_string(),
@@ -162,5 +177,23 @@ impl RunCommand {
         }
 
         Ok(output)
+    }
+}
+
+/// Server command for starting the REST API server
+#[derive(Parser)]
+#[command(name = "server")]
+#[command(about = "Start the REST API server")]
+pub struct ServerCommand {
+    /// Port to listen on
+    #[arg(long, default_value = "3000")]
+    pub port: u16,
+}
+
+impl ServerCommand {
+    /// Execute the server command
+    pub async fn execute(&self) -> Result<(), ElectionError> {
+        let server = crate::api::server::ApiServer::new(self.port);
+        server.start().await
     }
 }

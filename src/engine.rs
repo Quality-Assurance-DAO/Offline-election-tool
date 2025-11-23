@@ -32,18 +32,8 @@ impl ElectionEngine {
         // Select algorithm based on configuration
         let algorithm: Box<dyn ElectionAlgorithm> = match config.algorithm {
             AlgorithmType::SequentialPhragmen => Box::new(SequentialPhragmen),
-            AlgorithmType::ParallelPhragmen => {
-                return Err(ElectionError::AlgorithmError {
-                    message: "Parallel Phragmen algorithm not yet implemented".to_string(),
-                    algorithm: AlgorithmType::ParallelPhragmen,
-                });
-            }
-            AlgorithmType::MultiPhase => {
-                return Err(ElectionError::AlgorithmError {
-                    message: "Multi-phase algorithm not yet implemented".to_string(),
-                    algorithm: AlgorithmType::MultiPhase,
-                });
-            }
+            AlgorithmType::ParallelPhragmen => Box::new(crate::algorithms::parallel_phragmen::ParallelPhragmen),
+            AlgorithmType::MultiPhase => Box::new(crate::algorithms::multi_phase::MultiPhase),
         };
 
         // Apply overrides if present
