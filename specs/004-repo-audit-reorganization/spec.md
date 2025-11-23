@@ -5,6 +5,16 @@
 **Status**: Draft  
 **Input**: User description: "Audit and reorganize this GitHub repository to improve clarity, usability, and maintainability. Remove any duplicate, redundant, or outdated files. Consolidate all documentation into a clear, logical structure, ensuring that every technical term is defined where it appears and that all sections are coherently linked. Include an overview explaining the wider Polkadot ecosystem and explicitly describe how this solution fits within that context, including its role, dependencies, and interactions with relevant Polkadot components or standards. If tests are present, provide documented example test results so their purpose and expected outcomes are clear. The final repository should present a clean, well-structured, and context-rich codebase that is easy for both newcomers and experienced contributors to understand and use."
 
+## Clarifications
+
+### Session 2025-01-27
+
+- Q: When consolidating duplicate or redundant documentation files, what should happen if they contain conflicting information about the same topic? → A: Merge content with conflict resolution rules: prefer more specific/technical details, mark resolved conflicts with notes, preserve unique information from all sources
+- Q: How should the system distinguish between "duplicate" files (same content) and "redundant" files (overlapping but with some unique value)? → A: Duplicate = identical or near-identical content (>95% similarity); Redundant = significant overlap (>60%) but contains unique examples, edge cases, or complementary context that should be preserved
+- Q: What documentation structure/hierarchy pattern should be used for the reorganized repository? → A: Hybrid: Keep README.md at root as entry point, create docs/ folder for detailed documentation organized by topic (e.g., docs/api/, docs/testing/, docs/guides/)
+- Q: After reorganization moves or consolidates files, how should broken internal links be handled? → A: Update all internal links systematically to point to new locations, remove old files completely
+- Q: What criteria should be used to identify "outdated" files that no longer reflect current functionality? → A: Multi-factor: Files are outdated if they (1) reference code/features that no longer exist, OR (2) haven't been updated in 18+ months AND contain information contradicted by current code/docs
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Newcomer Discovers and Understands the Project (Priority: P1)
@@ -75,20 +85,21 @@ A developer or user runs tests and needs to understand what the results mean, wh
 
 ### Edge Cases
 
-- What happens when documentation references a file that no longer exists after reorganization?
+- What happens when documentation references a file that no longer exists after reorganization? → **Clarified**: All internal links are updated systematically to point to new locations before old files are removed
 - How does the system handle documentation that spans multiple files (e.g., API docs that reference test examples)?
 - What happens when technical terms are used in code comments but not defined in user-facing documentation?
 - How are deprecated features documented without cluttering the main documentation?
-- What happens when reorganization creates broken internal links between documentation files?
+- What happens when reorganization creates broken internal links between documentation files? → **Clarified**: All internal links are updated systematically during reorganization to prevent broken links
+- When consolidating duplicate files with conflicting information, how are conflicts resolved? → **Clarified**: Merge content with conflict resolution rules: prefer more specific/technical details, mark resolved conflicts with notes, preserve unique information from all sources
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: System MUST remove all duplicate documentation files, consolidating content into a single authoritative source per topic
-- **FR-002**: System MUST remove all redundant files that provide no unique value beyond what exists elsewhere
-- **FR-003**: System MUST remove or archive all outdated files that no longer reflect current functionality
-- **FR-004**: System MUST organize all documentation into a logical hierarchy with clear relationships between documents
+- **FR-001**: System MUST remove all duplicate documentation files (identical or near-identical content with >95% similarity), consolidating content into a single authoritative source per topic. When conflicting information exists between duplicate files, merge content using conflict resolution rules: prefer more specific/technical details, mark resolved conflicts with notes, and preserve unique information from all sources
+- **FR-002**: System MUST identify redundant files (significant overlap >60% but containing unique examples, edge cases, or complementary context) and consolidate their unique value into authoritative sources before removal. Files with unique technical details, examples, or context must have that information preserved during consolidation
+- **FR-003**: System MUST remove or archive all outdated files that no longer reflect current functionality. Outdated files are identified using multi-factor criteria: (1) reference code/features that no longer exist, OR (2) haven't been updated in 18+ months AND contain information contradicted by current code/docs
+- **FR-004**: System MUST organize all documentation into a logical hierarchy with clear relationships between documents. Structure: README.md remains at repository root as entry point; detailed documentation organized in `docs/` folder by topic (e.g., `docs/api/`, `docs/testing/`, `docs/guides/`)
 - **FR-005**: System MUST define every technical term where it first appears in each document, or provide a clear link to its definition
 - **FR-006**: System MUST create cross-references between related documentation sections to enable easy navigation
 - **FR-007**: System MUST include a comprehensive overview section explaining the Polkadot ecosystem, including validators, nominators, staking, and NPoS elections
@@ -96,7 +107,7 @@ A developer or user runs tests and needs to understand what the results mean, wh
 - **FR-009**: System MUST document all dependencies on Polkadot/Substrate standards, crates, and protocols
 - **FR-010**: System MUST provide documented example test results showing expected output format and interpretation
 - **FR-011**: System MUST ensure the main README provides a clear entry point that guides users to appropriate documentation based on their needs
-- **FR-012**: System MUST maintain backward compatibility for any external links or references to documentation (e.g., redirects or updated links)
+- **FR-012**: System MUST update all internal links systematically to point to new file locations after reorganization. Old files must be removed completely (no redirect files). External links should be handled via updated links or redirects as needed
 - **FR-013**: System MUST ensure all documentation sections are coherently linked, with clear navigation paths between related topics
 - **FR-014**: System MUST create a documentation structure that is intuitive for both newcomers (who need context) and experienced contributors (who need reference material)
 - **FR-015**: System MUST preserve all essential information during consolidation (no information loss)
@@ -115,14 +126,14 @@ A developer or user runs tests and needs to understand what the results mean, wh
 
 - **SC-001**: A newcomer can understand what the tool does, why it exists, and how to run their first election simulation within 5 minutes of reading the main README
 - **SC-002**: All technical terms are defined or linked to definitions within the same document where they first appear (100% coverage)
-- **SC-003**: Zero duplicate documentation files exist for the same topic (consolidated into single authoritative sources)
-- **SC-004**: Zero redundant files exist that provide no unique value beyond what exists elsewhere
-- **SC-005**: All outdated files are either removed or clearly marked as archived/deprecated
-- **SC-006**: Documentation is organized into a logical hierarchy where any piece of information can be found within 3 clicks from the main README
+- **SC-003**: Zero duplicate documentation files exist for the same topic (consolidated into single authoritative sources). Duplicate files are identified as having >95% content similarity
+- **SC-004**: Zero redundant files exist that provide no unique value beyond what exists elsewhere. Redundant files (>60% overlap) are identified, their unique content (examples, edge cases, complementary context) is preserved in consolidated sources, then redundant files are removed
+- **SC-005**: All outdated files are either removed or clearly marked as archived/deprecated. Outdated files identified via multi-factor criteria: reference non-existent code/features, OR (18+ months old AND contradicted by current code/docs)
+- **SC-006**: Documentation is organized into a logical hierarchy where any piece of information can be found within 3 clicks from the main README. Structure: README.md at root, detailed docs in `docs/` folder organized by topic
 - **SC-007**: The main README includes a comprehensive Polkadot ecosystem overview section that explains validators, nominators, staking, and NPoS elections
 - **SC-008**: The documentation explicitly describes how this tool fits within the Polkadot ecosystem, including at least: its role, dependencies on Substrate crates, interactions with RPC endpoints, and relationship to on-chain election processes
 - **SC-009**: All test documentation includes at least one example showing expected test output format and interpretation guide
-- **SC-010**: Cross-references between related documentation sections are functional and lead to correct destinations (100% link accuracy)
+- **SC-010**: Cross-references between related documentation sections are functional and lead to correct destinations (100% link accuracy). All internal links updated to new locations, no broken links remain
 - **SC-011**: A contributor can find documentation for any major feature (algorithms, API, testing, RPC usage) within 2 clicks from the main README
 - **SC-012**: The repository structure is intuitive enough that 90% of users can find what they need without asking for help
 
@@ -155,6 +166,6 @@ A developer or user runs tests and needs to understand what the results mean, wh
 ## Risks
 
 - **Information Loss**: Risk of accidentally removing important information during consolidation. Mitigation: Careful audit before removal, preserve content in consolidated locations.
-- **Broken Links**: Risk of breaking internal or external links to documentation. Mitigation: Create redirects or update all links systematically.
+- **Broken Links**: Risk of breaking internal or external links to documentation. Mitigation: Update all internal links systematically to new locations before removing old files. Handle external links via updated links or redirects as needed.
 - **User Confusion**: Risk of confusing existing users familiar with old structure. Mitigation: Clear migration guide or redirects.
 - **Incomplete Context**: Risk of providing incomplete or inaccurate Polkadot ecosystem context. Mitigation: Review against official Polkadot documentation.
