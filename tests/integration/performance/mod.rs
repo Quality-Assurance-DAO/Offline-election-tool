@@ -13,6 +13,7 @@ mod test_dense_voting;
 mod test_sparse_voting;
 mod test_memory_leak;
 mod test_concurrent_execution;
+mod test_polkadot_mainnet;
 
 pub use test_large_scale_1k::*;
 pub use test_large_scale_5k::*;
@@ -23,4 +24,5 @@ pub use test_dense_voting::*;
 pub use test_sparse_voting::*;
 pub use test_memory_leak::*;
 pub use test_concurrent_execution::*;
+pub use test_polkadot_mainnet::*;
 

@@ -28,10 +28,10 @@ description: "Task list for Polkadot Mainnet Performance Benchmarks feature impl
 
 **Purpose**: Project initialization and basic infrastructure
 
-- [ ] T001 Create benchmark results directory structure: tests/fixtures/benchmarks/
-- [ ] T002 [P] Add libc dependency to Cargo.toml for macOS memory measurement (version 0.2 or later)
-- [ ] T003 [P] Add winapi dependency to Cargo.toml for Windows memory measurement (version 0.3 or later, features: winbase, psapi)
-- [ ] T004 [P] Verify existing dependencies in Cargo.toml: jsonrpsee, tokio, serde, serde_json, chrono
+- [X] T001 Create benchmark results directory structure: tests/fixtures/benchmarks/
+- [X] T002 [P] Add libc dependency to Cargo.toml for macOS memory measurement (version 0.2 or later)
+- [X] T003 [P] Add winapi dependency to Cargo.toml for Windows memory measurement (version 0.3 or later, features: winbase, psapi)
+- [X] T004 [P] Verify existing dependencies in Cargo.toml: jsonrpsee, tokio, serde, serde_json, chrono
 
 ---
 
@@ -41,15 +41,15 @@ description: "Task list for Polkadot Mainnet Performance Benchmarks feature impl
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Create MemoryMeasurementError enum in tests/common/memory_measurement.rs with variants: UnsupportedPlatform, MeasurementFailed(String), PlatformError(String)
-- [ ] T006 [P] Create MemoryMeasurer trait in tests/common/memory_measurement.rs with methods: measure_peak_memory_mb() -> Result<u64, MemoryMeasurementError>, measure_current_memory_mb() -> Result<u64, MemoryMeasurementError>
-- [ ] T007 [P] [US2] Implement LinuxMemoryMeasurer in tests/common/memory_measurement.rs using /proc/self/status to read VmPeak and VmRSS
-- [ ] T008 [P] [US2] Implement MacOSMemoryMeasurer in tests/common/memory_measurement.rs using mach_task_basic_info via libc to get resident_size and virtual_size
-- [ ] T009 [P] [US2] Implement WindowsMemoryMeasurer in tests/common/memory_measurement.rs using GetProcessMemoryInfo from winapi to get PeakWorkingSetSize and WorkingSetSize
-- [ ] T010 [P] [US2] Implement UnsupportedMemoryMeasurer in tests/common/memory_measurement.rs for unsupported platforms returning UnsupportedPlatform error
-- [ ] T011 Enhance measure_memory_usage() function in tests/common/benchmark_utils.rs to use platform-specific MemoryMeasurer implementations with graceful degradation
-- [ ] T012 Enhance output_benchmark_json() function in tests/common/benchmark_utils.rs to include Polkadot-specific metadata fields: block_number, chain, rpc_endpoint, threshold_ms, threshold_passed, memory_measurement_available
-- [ ] T013 Create helper function calculate_recent_block_number() in tests/common/rpc_utils.rs to calculate block number within last 30 days (Polkadot block time ~6 seconds, ~432,000 blocks per 30 days)
+- [X] T005 Create MemoryMeasurementError enum in tests/common/memory_measurement.rs with variants: UnsupportedPlatform, MeasurementFailed(String), PlatformError(String)
+- [X] T006 [P] Create MemoryMeasurer trait in tests/common/memory_measurement.rs with methods: measure_peak_memory_mb() -> Result<u64, MemoryMeasurementError>, measure_current_memory_mb() -> Result<u64, MemoryMeasurementError>
+- [X] T007 [P] [US2] Implement LinuxMemoryMeasurer in tests/common/memory_measurement.rs using /proc/self/status to read VmPeak and VmRSS
+- [X] T008 [P] [US2] Implement MacOSMemoryMeasurer in tests/common/memory_measurement.rs using mach_task_basic_info via libc to get resident_size and virtual_size
+- [X] T009 [P] [US2] Implement WindowsMemoryMeasurer in tests/common/memory_measurement.rs using GetProcessMemoryInfo from winapi to get PeakWorkingSetSize and WorkingSetSize
+- [X] T010 [P] [US2] Implement UnsupportedMemoryMeasurer in tests/common/memory_measurement.rs for unsupported platforms returning UnsupportedPlatform error
+- [X] T011 Enhance measure_memory_usage() function in tests/common/benchmark_utils.rs to use platform-specific MemoryMeasurer implementations with graceful degradation
+- [X] T012 Enhance output_benchmark_json() function in tests/common/benchmark_utils.rs to include Polkadot-specific metadata fields: block_number, chain, rpc_endpoint, threshold_ms, threshold_passed, memory_measurement_available
+- [X] T013 Create helper function calculate_recent_block_number() in tests/common/rpc_utils.rs to calculate block number within last 30 days (Polkadot block time ~6 seconds, ~432,000 blocks per 30 days)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -65,21 +65,21 @@ description: "Task list for Polkadot Mainnet Performance Benchmarks feature impl
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T014 [P] [US1] Create integration test test_polkadot_mainnet_performance_sequential in tests/integration/performance/test_polkadot_mainnet.rs with #[ignore] attribute, fetching data from recent block and measuring execution time for sequential-phragmen algorithm
-- [ ] T015 [P] [US1] Create integration test test_polkadot_mainnet_performance_parallel in tests/integration/performance/test_polkadot_mainnet.rs with #[ignore] attribute, fetching data from recent block and measuring execution time for parallel-phragmen algorithm
-- [ ] T016 [P] [US1] Create integration test test_polkadot_mainnet_performance_multiphase in tests/integration/performance/test_polkadot_mainnet.rs with #[ignore] attribute, fetching data from recent block and measuring execution time for multi-phase algorithm
-- [ ] T017 [US1] Add threshold validation assertions to all three benchmark tests: sequential-phragmen < 30s, parallel-phragmen < 15s, multi-phase < 45s in tests/integration/performance/test_polkadot_mainnet.rs
+- [X] T014 [P] [US1] Create integration test test_polkadot_mainnet_performance_sequential in tests/integration/performance/test_polkadot_mainnet.rs with #[ignore] attribute, fetching data from recent block and measuring execution time for sequential-phragmen algorithm
+- [X] T015 [P] [US1] Create integration test test_polkadot_mainnet_performance_parallel in tests/integration/performance/test_polkadot_mainnet.rs with #[ignore] attribute, fetching data from recent block and measuring execution time for parallel-phragmen algorithm
+- [X] T016 [P] [US1] Create integration test test_polkadot_mainnet_performance_multiphase in tests/integration/performance/test_polkadot_mainnet.rs with #[ignore] attribute, fetching data from recent block and measuring execution time for multi-phase algorithm
+- [X] T017 [US1] Add threshold validation assertions to all three benchmark tests: sequential-phragmen < 30s, parallel-phragmen < 15s, multi-phase < 45s in tests/integration/performance/test_polkadot_mainnet.rs
 
 ### Implementation for User Story 1
 
-- [ ] T018 [US1] Enhance RpcLoader::load_at_block() in src/input/rpc.rs to use retry_with_backoff from tests/common/rpc_retry.rs with max_attempts: 3, initial_delay: Duration::from_secs(1) for benchmark tests
-- [ ] T019 [US1] Create helper function fetch_polkadot_mainnet_snapshot() in tests/common/rpc_utils.rs that uses RpcLoader with retry logic and returns PolkadotMainnetSnapshot with election_data, block_number, rpc_endpoint, fetch_timestamp
-- [ ] T020 [US1] Create helper function run_benchmark_with_algorithm() in tests/common/benchmark_utils.rs that takes ElectionData, AlgorithmType, and active_set_size, measures execution time, and returns BenchmarkResult
-- [ ] T021 [US1] Implement benchmark execution logic in test_polkadot_mainnet_performance_sequential test: fetch snapshot, run benchmark, validate threshold, output results
-- [ ] T022 [US1] Implement benchmark execution logic in test_polkadot_mainnet_performance_parallel test: fetch snapshot, run benchmark, validate threshold, output results
-- [ ] T023 [US1] Implement benchmark execution logic in test_polkadot_mainnet_performance_multiphase test: fetch snapshot, run benchmark, validate threshold, output results
-- [ ] T024 [US1] Add error handling for RPC failures with alternative endpoint suggestions in all three benchmark tests in tests/integration/performance/test_polkadot_mainnet.rs
-- [ ] T025 [US1] Add block number validation (within last 30 days) with optional override parameter in benchmark tests in tests/integration/performance/test_polkadot_mainnet.rs
+- [X] T018 [US1] Enhance RpcLoader::load_at_block() in src/input/rpc.rs to use retry_with_backoff from tests/common/rpc_retry.rs with max_attempts: 3, initial_delay: Duration::from_secs(1) for benchmark tests (implemented via fetch_polkadot_mainnet_snapshot wrapper)
+- [X] T019 [US1] Create helper function fetch_polkadot_mainnet_snapshot() in tests/common/rpc_utils.rs that uses RpcLoader with retry logic and returns PolkadotMainnetSnapshot with election_data, block_number, rpc_endpoint, fetch_timestamp
+- [X] T020 [US1] Create helper function run_benchmark_with_algorithm() in tests/common/benchmark_utils.rs that takes ElectionData, AlgorithmType, and active_set_size, measures execution time, and returns BenchmarkResult
+- [X] T021 [US1] Implement benchmark execution logic in test_polkadot_mainnet_performance_sequential test: fetch snapshot, run benchmark, validate threshold, output results
+- [X] T022 [US1] Implement benchmark execution logic in test_polkadot_mainnet_performance_parallel test: fetch snapshot, run benchmark, validate threshold, output results
+- [X] T023 [US1] Implement benchmark execution logic in test_polkadot_mainnet_performance_multiphase test: fetch snapshot, run benchmark, validate threshold, output results
+- [X] T024 [US1] Add error handling for RPC failures with alternative endpoint suggestions in all three benchmark tests in tests/integration/performance/test_polkadot_mainnet.rs
+- [X] T025 [US1] Add block number validation (within last 30 days) with optional override parameter in benchmark tests in tests/integration/performance/test_polkadot_mainnet.rs
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. Developers can run benchmarks with real Polkadot mainnet data and receive execution time measurements.
 
