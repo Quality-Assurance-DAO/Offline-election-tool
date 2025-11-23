@@ -226,7 +226,11 @@ The REST API provides HTTP endpoints for election operations:
 - `GET /elections/:id/diagnostics` - Get detailed diagnostics for an election
 - `GET /health` - Health check endpoint
 
-See [API_USAGE.md](API_USAGE.md) for detailed API documentation and examples.
+See [API_USAGE.md](API_USAGE.md) for comprehensive API documentation including:
+- Complete API usage examples for all three algorithms
+- **Synthetic data construction guide** with edge case examples
+- Validation rules and error handling
+- Security considerations for production deployment
 
 ## Security and Robustness
 
