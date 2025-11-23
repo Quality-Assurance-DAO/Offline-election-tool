@@ -4,6 +4,7 @@ use crate::error::ElectionError;
 use crate::models::election_data::{ElectionData, ElectionMetadata};
 use crate::models::nominator::Nominator;
 use crate::models::validator::ValidatorCandidate;
+use jsonrpsee::core::client::ClientT;
 use jsonrpsee::http_client::{HttpClient, HttpClientBuilder};
 use serde_json::Value;
 
@@ -53,10 +54,12 @@ impl RpcLoader {
 
     /// Get block hash for a given block number
     async fn get_block_hash(&self, block_number: u64) -> Result<String, ElectionError> {
-        let params = serde_json::json!([format!("0x{:x}", block_number)]);
         let response: Value = self
             .client
-            .request("chain_getBlockHash", params)
+            .request(
+                "chain_getBlockHash",
+                (format!("0x{:x}", block_number),),
+            )
             .await
             .map_err(|e| ElectionError::RpcError {
                 message: format!("Failed to get block hash: {}", e),

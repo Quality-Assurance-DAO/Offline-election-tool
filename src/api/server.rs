@@ -11,7 +11,7 @@ pub struct ApiServer {
 impl ApiServer {
     /// Create a new API server
     pub fn new() -> Self {
-        Self
+        Self {}
     }
 
     /// Start the server

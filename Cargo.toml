@@ -17,10 +17,11 @@ name = "offline-election"
 path = "src/main.rs"
 
 [dependencies]
-# Substrate election crates
-sp-npos-elections = "7.0"
-frame-election-provider-support = "4.0"
-pallet-election-provider-multi-phase = "4.0"
+# Substrate election crates (updated to the latest compatible releases)
+sp-npos-elections = "39.0"
+frame-election-provider-support = "43.0"
+pallet-election-provider-multi-phase = "42.0"
+sp-runtime = "44.0"
 parity-scale-codec = { version = "3.0", features = ["derive"] }
 
 # RPC client
@@ -47,3 +48,5 @@ chrono = { version = "0.4", features = ["serde"] }
 [dev-dependencies]
 # Testing utilities as needed
 
+[patch.crates-io]
+trie-db = { path = "patches/trie-db" }

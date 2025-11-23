@@ -8,6 +8,8 @@ use crate::error::ElectionError;
 use crate::models::election_config::ElectionConfiguration;
 use crate::models::election_data::ElectionData;
 use crate::models::election_result::{ElectionResult, SelectedValidator, StakeAllocation, ExecutionMetadata};
+use sp_runtime::Perbill;
+use std::collections::HashMap;
 
 /// Sequential Phragmen algorithm implementation
 pub struct SequentialPhragmen;
@@ -21,54 +23,61 @@ impl ElectionAlgorithm for SequentialPhragmen {
         // Convert our data models to sp-npos-elections format
         // Note: The exact API of sp-npos-elections may vary by version
         // This structure provides the integration point and may need adjustment
-        
-        let candidate_count = data.candidates.len();
-        let voter_count = data.nominators.len();
-
-        if candidate_count == 0 || voter_count == 0 {
+        if data.candidates.is_empty() || data.nominators.is_empty() {
             return Err(ElectionError::ValidationError {
                 message: "Cannot run election with zero candidates or voters".to_string(),
                 field: None,
             });
         }
 
-        // Build candidate list with indices and stakes
-        let candidates: Vec<(usize, u128)> = data
+        let candidate_lookup: HashMap<String, &crate::models::validator::ValidatorCandidate> = data
             .candidates
             .iter()
-            .enumerate()
-            .map(|(idx, c)| (idx, c.stake))
+            .map(|candidate| (candidate.account_id.clone(), candidate))
             .collect();
 
-        // Build voter list: (voter_index, stake, [(candidate_index, weight)])
-        let mut voters: Vec<(usize, u128, Vec<(usize, u128)>)> = Vec::new();
-        let candidate_id_to_index: std::collections::HashMap<&String, usize> = data
+        let nominator_lookup: HashMap<String, &crate::models::nominator::Nominator> = data
+            .nominators
+            .iter()
+            .map(|nominator| (nominator.account_id.clone(), nominator))
+            .collect();
+
+        // Preserve the original ordering of candidates when passing to the Substrate crate.
+        let candidates: Vec<String> = data
             .candidates
             .iter()
-            .enumerate()
-            .map(|(idx, c)| (&c.account_id, idx))
+            .map(|candidate| candidate.account_id.clone())
             .collect();
 
-        for (voter_idx, nominator) in data.nominators.iter().enumerate() {
-            let mut targets = Vec::new();
-            for target_id in &nominator.targets {
-                if let Some(&candidate_idx) = candidate_id_to_index.get(target_id) {
-                    // Use equal weight distribution for now
-                    // In practice, this might be proportional to stake
-                    targets.push((candidate_idx, nominator.stake));
-                }
+        let mut voters: Vec<(String, u64, Vec<String>)> = Vec::new();
+        for nominator in data.nominators.iter() {
+            let targets: Vec<String> = nominator
+                .targets
+                .iter()
+                .filter(|id| candidate_lookup.contains_key(*id))
+                .cloned()
+                .collect();
+
+            if targets.is_empty() {
+                continue;
             }
-            if !targets.is_empty() {
-                voters.push((voter_idx, nominator.stake, targets));
-            }
+
+            let stake_u64 = nominator.stake.min(u64::MAX as u128) as u64;
+            voters.push((nominator.account_id.clone(), stake_u64, targets));
         }
 
-        // Run sequential phragmen algorithm using sp-npos-elections
-        // Note: The exact function signature may vary - this is a placeholder structure
-        let solution = sp_npos_elections::seq_phragmen(
+        if voters.is_empty() {
+            return Err(ElectionError::ValidationError {
+                message: "No valid voter/candidate relationships found".to_string(),
+                field: None,
+            });
+        }
+
+        let solution = sp_npos_elections::seq_phragmen::<String, Perbill>(
             config.active_set_size as usize,
             candidates,
             voters,
+            None,
         )
         .map_err(|e| ElectionError::AlgorithmError {
             message: format!("Sequential phragmen algorithm failed: {:?}", e),
@@ -77,42 +86,45 @@ impl ElectionAlgorithm for SequentialPhragmen {
 
         // Convert results back to our format
         let mut selected_validators = Vec::new();
+        for (rank, (winner_id, total_backing)) in solution.winners.iter().enumerate() {
+            if let Some(candidate) = candidate_lookup.get(winner_id) {
+                let nominator_count = solution
+                    .assignments
+                    .iter()
+                    .filter(|assignment| {
+                        assignment
+                            .distribution
+                            .iter()
+                            .any(|(target, _)| target == winner_id)
+                    })
+                    .count() as u32;
+
+                selected_validators.push(SelectedValidator {
+                    account_id: candidate.account_id.clone(),
+                    total_backing_stake: *total_backing,
+                    nominator_count,
+                    rank: Some(rank as u32 + 1),
+                });
+            }
+        }
+
         let mut stake_distribution = Vec::new();
-        let mut total_stake = 0u128;
+        let perbill_denominator = Perbill::one().deconstruct() as f64;
 
-        for (rank, (candidate_idx, _)) in solution.winners.iter().enumerate() {
-            let candidate = &data.candidates[*candidate_idx];
-            let mut total_backing = 0u128;
-            let mut nominator_count = 0u32;
+        for assignment in &solution.assignments {
+            if let Some(nominator) = nominator_lookup.get(&assignment.who) {
+                for (validator_id, portion) in &assignment.distribution {
+                    let proportion = portion.deconstruct() as f64 / perbill_denominator;
+                    let amount = (*portion * nominator.stake) as u128;
 
-            // Calculate stake distribution from assignments
-            for assignment in &solution.assignment {
-                let (voter_idx, assignments) = assignment;
-                for (c_idx, portion) in assignments {
-                    if *c_idx == *candidate_idx {
-                        let nominator = &data.nominators[*voter_idx];
-                        let amount = (nominator.stake as f64 * portion) as u128;
-                        total_backing += amount;
-                        nominator_count += 1;
-
-                        stake_distribution.push(StakeAllocation {
-                            nominator_id: nominator.account_id.clone(),
-                            validator_id: candidate.account_id.clone(),
-                            amount,
-                            proportion: *portion,
-                        });
-                    }
+                    stake_distribution.push(StakeAllocation {
+                        nominator_id: nominator.account_id.clone(),
+                        validator_id: validator_id.clone(),
+                        amount,
+                        proportion,
+                    });
                 }
             }
-
-            total_stake += total_backing;
-
-            selected_validators.push(SelectedValidator {
-                account_id: candidate.account_id.clone(),
-                total_backing_stake: total_backing,
-                nominator_count,
-                rank: Some(rank as u32 + 1),
-            });
         }
 
         // Calculate total stake from all nominators
@@ -121,7 +133,7 @@ impl ElectionAlgorithm for SequentialPhragmen {
         Ok(ElectionResult {
             selected_validators,
             stake_distribution,
-            total_stake: total_nominator_stake.max(total_stake),
+            total_stake: total_nominator_stake,
             algorithm_used: crate::types::AlgorithmType::SequentialPhragmen,
             execution_metadata: ExecutionMetadata {
                 block_number: config.block_number,

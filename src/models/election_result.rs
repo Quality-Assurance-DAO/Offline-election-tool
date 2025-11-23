@@ -4,7 +4,7 @@ use crate::types::AlgorithmType;
 use serde::{Deserialize, Serialize};
 
 /// Outcome of an election execution
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ElectionResult {
     /// List of validators selected for the active set
     pub selected_validators: Vec<SelectedValidator>,
@@ -33,7 +33,7 @@ pub struct SelectedValidator {
 }
 
 /// How a nominator's stake is allocated to a validator
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct StakeAllocation {
     /// Account ID of the nominator
     pub nominator_id: String,

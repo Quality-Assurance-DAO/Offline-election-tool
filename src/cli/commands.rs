@@ -64,11 +64,15 @@ impl RunCommand {
             })?;
 
         // Create election configuration
-        let config = ElectionConfiguration::new()
+        let mut config = ElectionConfiguration::new()
             .algorithm(algorithm)
-            .active_set_size(self.active_set_size)
-            .block_number(self.block_number)
-            .build()?;
+            .active_set_size(self.active_set_size);
+
+        if let Some(block) = self.block_number {
+            config = config.block_number(block);
+        }
+
+        let config = config.build()?;
 
         // Execute election
         let engine = ElectionEngine::new();
