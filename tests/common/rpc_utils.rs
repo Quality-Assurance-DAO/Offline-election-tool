@@ -17,7 +17,7 @@ pub async fn fetch_chain_snapshot(
     block_number: u64,
 ) -> Result<ChainSnapshot, String> {
     // Load election data from RPC
-    let election_data = ElectionData::from_rpc(rpc_endpoint, Some(block_number))
+    let _election_data = ElectionData::from_rpc(rpc_endpoint, Some(block_number))
         .await
         .map_err(|e| format!("Failed to fetch election data from RPC: {}", e))?;
     

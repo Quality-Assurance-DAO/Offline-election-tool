@@ -15,7 +15,7 @@ use offline_election::types::AlgorithmType;
 pub fn generate_large_scale_election_data(
     candidate_count: usize,
     nominator_count: usize,
-    algorithm: AlgorithmType,
+    _algorithm: AlgorithmType,
 ) -> ElectionData {
     let mut election_data = ElectionData::new();
     
