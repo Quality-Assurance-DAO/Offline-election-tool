@@ -29,6 +29,13 @@ pub fn load_chain_snapshot<P: AsRef<Path>>(path: P) -> Result<ChainSnapshot, Str
     Ok(snapshot)
 }
 
+/// Load a regression test fixture from a JSON file
+/// 
+/// This is a convenience alias for `load_test_fixture()` specifically for regression tests.
+pub fn load_regression_fixture<P: AsRef<Path>>(path: P) -> Result<TestFixture, String> {
+    load_test_fixture(path)
+}
+
 /// Validate fixture schema
 pub fn validate_fixture_schema(fixture: &TestFixture) -> Result<(), String> {
     // Validate metadata

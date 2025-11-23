@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "test_name": "normal_election_5x5",
+    "description": "Normal election with 5 candidates and 5 nominators",
+    "created": "2025-01-27T10:00:00Z",
+    "algorithm": "sequential-phragmen",
+    "category": "regression",
+    "tags": ["normal_case", "baseline"]
+  },
+  "input": {
+    "candidates": [
+      {
+        "account_id": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+        "stake": 1000000000
+      },
+      {
+        "account_id": "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+        "stake": 2000000000
+      },
+      {
+        "account_id": "5FLSigC9HGRKVhB9F7BqHjXJxZJxZJxZJxZJxZJxZJxZJxZJxZ",
+        "stake": 3000000000
+      },
+      {
+        "account_id": "5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY",
+        "stake": 4000000000
+      },
+      {
+        "account_id": "5DbKjhNLpqX3HYq2b3tS1J3Z6sF7X8Y9Z0A1B2C3D4E5F6G7H8",
+        "stake": 5000000000
+      }
+    ],
+    "nominators": [
+      {
+        "account_id": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
+        "stake": 1000000000,
+        "targets": ["5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY", "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty"]
+      },
+      {
+        "account_id": "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty",
+        "stake": 2000000000,
+        "targets": ["5FLSigC9HGRKVhB9F7BqHjXJxZJxZJxZJxZJxZJxZJxZJxZJxZ", "5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY"]
+      },
+      {
+        "account_id": "5FLSigC9HGRKVhB9F7BqHjXJxZJxZJxZJxZJxZJxZJxZJxZJxZ",
+        "stake": 3000000000,
+        "targets": ["5DbKjhNLpqX3HYq2b3tS1J3Z6sF7X8Y9Z0A1B2C3D4E5F6G7H8"]
+      },
+      {
+        "account_id": "5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY",
+        "stake": 4000000000,
+        "targets": ["5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY", "5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty", "5FLSigC9HGRKVhB9F7BqHjXJxZJxZJxZJxZJxZJxZJxZJxZJxZ"]
+      },
+      {
+        "account_id": "5DbKjhNLpqX3HYq2b3tS1J3Z6sF7X8Y9Z0A1B2C3D4E5F6G7H8",
+        "stake": 5000000000,
+        "targets": ["5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY", "5DbKjhNLpqX3HYq2b3tS1J3Z6sF7X8Y9Z0A1B2C3D4E5F6G7H8"]
+      }
+    ]
+  },
+  "expected_result": null
+}
+
