@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "chain": "kusama",
+    "block_number": 20000000,
+    "timestamp": "2024-01-15T10:30:00Z",
+    "rpc_endpoint": "https://rpc.polkadot.io",
+    "expected_validators": [],
+    "expected_stake_allocations": {}
+  },
+  "election_data": {
+    "candidates": [],
+    "nominators": []
+  },
+  "expected_result": {
+    "selected_validators": [],
+    "stake_distribution": [],
+    "total_stake": 0,
+    "algorithm_used": "sequential-phragmen",
+    "execution_metadata": {
+      "block_number": 20000000
+    }
+  }
+}
+
