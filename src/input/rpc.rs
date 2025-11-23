@@ -183,11 +183,13 @@ impl RpcLoader {
         ).await.map_err(|_| ElectionError::RpcError {
             message: format!(
                 "Timeout after 30 seconds while getting block hash for block {}.\n\
-                The RPC endpoint may be slow or unresponsive.\n\
+                The RPC endpoint may be slow, unresponsive, or may not support historical blocks.\n\
                 Please try:\n\
+                - Using an archive node endpoint (see RPC_ARCHIVE_NODES.md for list)\n\
                 - Using a different RPC endpoint\n\
                 - Using --input-file with JSON data instead\n\
-                - Checking your network connection",
+                - Checking your network connection\n\
+                Note: Historical block queries require archive nodes, not regular RPC endpoints.",
                 block_number
             ),
             url: self.url.clone(),
@@ -488,11 +490,14 @@ impl RpcLoader {
                 "Could not fetch validators from chain storage.\n\
                 Tried Session::Validators() and Staking::Validators() storage keys.\n\
                 Both returned null, which might indicate:\n\
-                1. The storage keys are incorrect for this chain\n\
-                2. The block hash is invalid\n\
-                3. The RPC endpoint doesn't support these storage queries\n\
+                1. The RPC endpoint doesn't support historical state queries (requires archive node)\n\
+                2. The storage keys are incorrect for this chain\n\
+                3. The block hash is invalid\n\
                 Block hash: {}\n\
-                Try using --input-file with JSON data instead.",
+                Solutions:\n\
+                - Use an archive node endpoint (see RPC_ARCHIVE_NODES.md for list)\n\
+                - Try using --input-file with JSON data instead\n\
+                - Verify the block number is valid for this chain",
                 block_hash
             ),
             url: self.url.clone(),
@@ -1128,8 +1133,10 @@ impl RpcLoader {
                             Tried both state_getKeys and state_getKeysPaged.\n\
                 Block hash: {}\n\
                             \n\
-                            This RPC endpoint might not support these methods.\n\
-                            Please use --input-file with JSON data instead.",
+                            This RPC endpoint might not support these methods or historical state queries.\n\
+                            Solutions:\n\
+                            - Use an archive node endpoint (see RPC_ARCHIVE_NODES.md for list)\n\
+                            - Use --input-file with JSON data instead",
                 block_hash
             ),
                         url: self.url.clone(),

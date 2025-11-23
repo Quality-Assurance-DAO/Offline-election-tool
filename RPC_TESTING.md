@@ -105,10 +105,20 @@ Until storage decoding is fully implemented, you can:
 
 ## Public RPC Endpoints for Testing
 
+### Regular RPC Endpoints (Latest Blocks Only)
 - **Polkadot**: `https://rpc.polkadot.io`
 - **Kusama**: `https://kusama-rpc.polkadot.io`
 - **Westend**: `https://westend-rpc.polkadot.io`
 - **Rococo**: `https://rococo-rpc.polkadot.io`
+
+### Archive Node Endpoints (Historical Blocks)
+For historical block queries (`--block-number`), use archive node endpoints:
+
+- **Polkadot Archive**: `https://polkadot.api.onfinality.io/public`, `https://polkadot-rpc.dwellir.com`
+- **Kusama Archive**: `https://kusama.api.onfinality.io/public`, `https://kusama-rpc.dwellir.com`
+- **Westend Archive**: `https://westend.api.onfinality.io/public`
+
+**Important**: Regular RPC endpoints typically only maintain recent state (~256 blocks). For historical queries, you must use archive node endpoints. See [RPC_ARCHIVE_NODES.md](RPC_ARCHIVE_NODES.md) for comprehensive documentation on archive node support.
 
 ## Verification
 

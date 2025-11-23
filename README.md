@@ -33,12 +33,21 @@ The binary will be available at `target/release/offline-election` (or `offline-e
 ### Run Election from RPC (On-Chain Data)
 
 ```bash
+# Latest block (any RPC endpoint)
 offline-election run \
   --algorithm sequential-phragmen \
   --active-set-size 100 \
-  --rpc-url https://rpc.polkadot.io \
+  --rpc-url https://rpc.polkadot.io
+
+# Historical block (requires archive node endpoint)
+offline-election run \
+  --algorithm sequential-phragmen \
+  --active-set-size 100 \
+  --rpc-url https://polkadot.api.onfinality.io/public \
   --block-number 12345678
 ```
+
+**Note**: For historical blocks (`--block-number`), use archive node endpoints. See [RPC_ARCHIVE_NODES.md](RPC_ARCHIVE_NODES.md) for details.
 
 ### Run Election from JSON File
 
@@ -112,7 +121,7 @@ offline-election run [OPTIONS]
 - `--algorithm <ALGORITHM>` - Election algorithm: `sequential-phragmen`, `parallel-phragmen`, or `multi-phase` (required)
 - `--active-set-size <SIZE>` - Number of validators to select (required)
 - `--rpc-url <URL>` - RPC endpoint URL (conflicts with `--input-file` and `--synthetic`)
-- `--block-number <NUMBER>` - Block number for RPC snapshot (requires `--rpc-url`)
+- `--block-number <NUMBER>` - Block number for RPC snapshot (requires `--rpc-url`). **Note**: Historical blocks require archive node endpoints. See [RPC_ARCHIVE_NODES.md](RPC_ARCHIVE_NODES.md) for details.
 - `--input-file <PATH>` - Path to JSON file with election data (conflicts with `--rpc-url` and `--synthetic`)
 - `--synthetic` - Use synthetic data (conflicts with `--rpc-url` and `--input-file`)
 - `--override-candidate-stake <ACCOUNT_ID=STAKE>` - Override candidate stake (can be repeated)
@@ -227,6 +236,7 @@ See [API_USAGE.md](API_USAGE.md) for detailed API documentation and examples.
 - Check network connectivity
 - Try alternative RPC endpoints (the tool suggests alternatives automatically)
 - Some RPC endpoints may have rate limits - wait and retry
+- **For historical blocks (`--block-number`)**: Use archive node endpoints (see [RPC_ARCHIVE_NODES.md](RPC_ARCHIVE_NODES.md))
 
 **Validation Errors:**
 - Ensure all candidate account IDs are unique
@@ -250,6 +260,7 @@ See [API_USAGE.md](API_USAGE.md) for detailed API documentation and examples.
 - Review the [Feature Specification](specs/001-offline-npos-election/spec.md) for requirements
 - See [API_USAGE.md](API_USAGE.md) for API documentation
 - Check [TESTING.md](TESTING.md) for testing examples
+- **For historical block queries**: See [RPC_ARCHIVE_NODES.md](RPC_ARCHIVE_NODES.md) for archive node requirements and troubleshooting
 
 ## Examples
 
@@ -257,7 +268,8 @@ See [API_USAGE.md](API_USAGE.md) for detailed API documentation and examples.
 
 ```bash
 # Run same data through different algorithms
-DATA="--rpc-url https://rpc.polkadot.io --block-number 12345678 --active-set-size 100"
+# Note: For historical blocks, use archive node endpoint
+DATA="--rpc-url https://polkadot.api.onfinality.io/public --block-number 12345678 --active-set-size 100"
 
 offline-election run --algorithm sequential-phragmen $DATA --output-file seq_results.json
 offline-election run --algorithm parallel-phragmen $DATA --output-file par_results.json
