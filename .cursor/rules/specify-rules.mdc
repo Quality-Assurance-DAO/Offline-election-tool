@@ -6,6 +6,8 @@ Auto-generated from all feature plans. Last updated: 2025-11-23
 - Rust 1.70+ (MSRV) (002-comprehensive-testing)
 - Version-controlled JSON files in `tests/fixtures/` directory for chain snapshots and regression test data (002-comprehensive-testing)
 - File-based JSON storage in `tests/fixtures/benchmarks/` directory for benchmark results (003-polkadot-mainnet-benchmarks)
+- Rust 1.70+ (from Cargo.toml) + Substrate crates (sp-npos-elections, frame-election-provider-support), Axum (REST API), Clap (CLI), Serde (serialization) (004-repo-audit-reorganization)
+- N/A (documentation reorganization only, no data storage involved) (004-repo-audit-reorganization)
 
 - Rust 1.70+ (MSRV - Minimum Supported Rust Version) (001-offline-npos-election)
 
@@ -25,10 +27,10 @@ cargo test [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECH
 Rust 1.70+ (MSRV - Minimum Supported Rust Version): Follow standard conventions
 
 ## Recent Changes
+- 004-repo-audit-reorganization: Added Rust 1.70+ (from Cargo.toml) + Substrate crates (sp-npos-elections, frame-election-provider-support), Axum (REST API), Clap (CLI), Serde (serialization)
 - 003-polkadot-mainnet-benchmarks: Added Rust 1.70+ (MSRV - Minimum Supported Rust Version)
 - 002-comprehensive-testing: Added Rust 1.70+ (MSRV)
 
-- 001-offline-npos-election: Added Rust 1.70+ (MSRV - Minimum Supported Rust Version)
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
